@@ -82,3 +82,39 @@ jobs:
     with:
       manifest-path: 'native/my_nif/Cargo.toml'
 ```
+
+## Usage: NIF Release
+
+Build and release precompiled NIFs for multiple platforms:
+
+```yaml
+name: Release
+
+on:
+  push:
+    branches: [main]
+    paths: ["native/**", ".github/workflows/release.yml"]
+    tags: ["*"]
+  pull_request:
+    paths: [".github/workflows/release.yml"]
+  workflow_dispatch:
+
+jobs:
+  release:
+    uses: leandrocp/github-actions/.github/workflows/nif_release.yml@main
+    with:
+      project-name: my_nif
+      project-dir: native/my_nif
+```
+
+Customize NIF versions:
+
+```yaml
+jobs:
+  release:
+    uses: leandrocp/github-actions/.github/workflows/nif_release.yml@main
+    with:
+      project-name: my_nif
+      project-dir: native/my_nif
+      nif-versions: '["2.15", "2.16"]'
+```
