@@ -18,7 +18,6 @@ on:
 
 jobs:
   build_release:
-    name: NIF ${{ matrix.nif }} - ${{ matrix.job.target }} (${{ matrix.job.os }} | ${{ matrix.job.variant || 'default' }})
     runs-on: ${{ matrix.job.os }}
 
     permissions:
