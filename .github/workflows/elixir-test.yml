@@ -3,12 +3,6 @@ name: Elixir - Test
 on:
   workflow_call:
     inputs:
-      elixirs:
-        type: string
-        default: "[\"1.15.0\", \"1.19.x\"]"
-      erlangs:
-        type: string
-        default: "[\"25.1\", \"28.x\"]"
       pairs:
         type: string
         default: "[{\"elixir\": \"1.15.0\", \"otp\": \"25.1\"}, {\"elixir\": \"1.19.x\", \"otp\": \"28.x\"}]"
