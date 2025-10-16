@@ -18,6 +18,7 @@ on:
 
 jobs:
   build:
+    name: ${{ matrix.job.os }} ${{ matrix.job.target }}, ${{ matrix.nif }}, ${{ matrix.job.variant || 'default' }}
     runs-on: ${{ matrix.job.os }}
 
     permissions:
