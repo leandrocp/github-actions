@@ -4,6 +4,15 @@ Reusable GitHub Actions workflows for testing and linting Elixir and Rust projec
 
 Initially based on [mtrudel/elixir-ci-actions](https://github.com/mtrudel/elixir-ci-actions).
 
+Used by:
+- https://github.com/leandrocp/mdex
+- https://github.com/leandrocp/mdex_mermaid
+- https://github.com/leandrocp/mdex_gfm
+- https://github.com/leandrocp/autumnus
+- https://github.com/leandrocp/autumn
+- https://github.com/leandrocp/req_embed
+- https://github.com/leandrocp/err
+
 ## Usage: Elixir
 
 ```yaml
