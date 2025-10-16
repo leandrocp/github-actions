@@ -8,7 +8,7 @@ on:
         default: "[\"ubuntu-latest\", \"windows-latest\", \"macos-latest\"]"
       rust-versions:
         type: string
-        default: "[\"stable\", \"beta\", \"nightly\"]"
+        default: "[\"stable\", \"nightly\"]"
       manifest-path:
         type: string
         default: "Cargo.toml"
