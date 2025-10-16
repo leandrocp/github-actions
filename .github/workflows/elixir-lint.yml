@@ -9,9 +9,6 @@ on:
       erlangs:
         type: string
         default: "[\"28.x\"]"
-      setup-rust:
-        type: boolean
-        default: false
 
 env:
   MIX_ENV: test
@@ -38,16 +35,6 @@ jobs:
       with:
         elixir-version: ${{ matrix.elixir }}
         otp-version: ${{ matrix.otp }}
-
-    - name: Setup Rust
-      if: inputs.setup-rust
-      uses: dtolnay/rust-toolchain@master
-      with:
-        toolchain: stable
-
-    - name: Cache Rust
-      if: inputs.setup-rust
-      uses: Swatinem/rust-cache@v2
 
     - name: Disable compile warnings
       run: echo "::remove-matcher owner=elixir-mixCompileWarning::"

@@ -37,20 +37,6 @@ jobs:
       erlangs: '["28.x"]'
 ```
 
-Enable Rust toolchain for projects with Rust NIFs:
-
-```yaml
-jobs:
-  test:
-    uses: leandrocp/github-actions/.github/workflows/elixir-test.yml@main
-    with:
-      setup-rust: true
-  lint:
-    uses: leandrocp/github-actions/.github/workflows/elixir-lint.yml@main
-    with:
-      setup-rust: true
-```
-
 ## Usage: Rust
 
 ```yaml
