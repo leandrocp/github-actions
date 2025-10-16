@@ -17,7 +17,7 @@ on:
         description: "NIF versions to build for"
 
 jobs:
-  build_release:
+  build:
     runs-on: ${{ matrix.job.os }}
 
     permissions:
