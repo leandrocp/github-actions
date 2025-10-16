@@ -5,7 +5,7 @@ on:
     inputs:
       rust-versions:
         type: string
-        default: "[\"stable\"]"
+        default: "[\"nightly\"]"
       manifest-path:
         type: string
         default: "Cargo.toml"
