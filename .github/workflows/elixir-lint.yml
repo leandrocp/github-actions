@@ -19,8 +19,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        elixir: ${{ fromJSON(inputs.elixirs) }}
         otp: ${{ fromJSON(inputs.erlangs) }}
+        elixir: ${{ fromJSON(inputs.elixirs) }}
+        exclude:
+          - elixir: 1.16.x
+            otp: 28.x
+          - elixir: 1.17.x
+            otp: 28.x
     steps:
     - name: Checkout code
       uses: actions/checkout@v5
