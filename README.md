@@ -68,3 +68,17 @@ jobs:
     with:
       rust-versions: '["stable"]'
 ```
+
+Use with Rust NIFs (custom manifest path):
+
+```yaml
+jobs:
+  test:
+    uses: leandrocp/github-actions/.github/workflows/rust-test.yml@main
+    with:
+      manifest-path: 'native/my_nif/Cargo.toml'
+  lint:
+    uses: leandrocp/github-actions/.github/workflows/rust-lint.yml@main
+    with:
+      manifest-path: 'native/my_nif/Cargo.toml'
+```

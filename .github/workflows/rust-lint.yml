@@ -6,6 +6,10 @@ on:
       rust-versions:
         type: string
         default: "[\"stable\"]"
+      manifest-path:
+        type: string
+        default: "Cargo.toml"
+        description: "Path to Cargo.toml (e.g., 'native/my_nif/Cargo.toml')"
 
 env:
   CARGO_TERM_COLOR: always
@@ -31,7 +35,7 @@ jobs:
       uses: Swatinem/rust-cache@v2
 
     - name: Check formatting
-      run: cargo fmt -- --check
+      run: cargo fmt --manifest-path ${{ inputs.manifest-path }} -- --check
 
     - name: Run clippy
-      run: cargo clippy --all-targets --all-features -- -D warnings
+      run: cargo clippy --all-targets --all-features --manifest-path ${{ inputs.manifest-path }} -- -D warnings

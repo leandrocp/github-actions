@@ -9,6 +9,10 @@ on:
       rust-versions:
         type: string
         default: "[\"stable\", \"beta\", \"nightly\"]"
+      manifest-path:
+        type: string
+        default: "Cargo.toml"
+        description: "Path to Cargo.toml (e.g., 'native/my_nif/Cargo.toml')"
 
 env:
   CARGO_TERM_COLOR: always
@@ -34,7 +38,7 @@ jobs:
       uses: Swatinem/rust-cache@v2
 
     - name: Build
-      run: cargo build --verbose
+      run: cargo build --verbose --manifest-path ${{ inputs.manifest-path }}
 
     - name: Run tests
-      run: cargo test --all-features
+      run: cargo test --all-features --manifest-path ${{ inputs.manifest-path }}
