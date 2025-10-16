@@ -29,13 +29,26 @@ jobs:
   test:
     uses: leandrocp/github-actions/.github/workflows/elixir-test.yml@main
     with:
-      elixirs: '["1.17.x", "1.18.x"]'
-      erlangs: '["27.x", "28.x"]'
+      pairs: '[{"elixir": "1.17.x", "otp": "27.x"}, {"elixir": "1.18.x", "otp": "28.x"}]'
   lint:
     uses: leandrocp/github-actions/.github/workflows/elixir-lint.yml@main
     with:
       elixirs: '["1.18.x"]'
       erlangs: '["28.x"]'
+```
+
+Enable Rust toolchain for projects with Rust NIFs:
+
+```yaml
+jobs:
+  test:
+    uses: leandrocp/github-actions/.github/workflows/elixir-test.yml@main
+    with:
+      setup-rust: true
+  lint:
+    uses: leandrocp/github-actions/.github/workflows/elixir-lint.yml@main
+    with:
+      setup-rust: true
 ```
 
 ## Usage: Rust
