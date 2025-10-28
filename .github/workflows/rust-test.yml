@@ -14,10 +14,6 @@ on:
         default: "Cargo.toml"
         description: "Path to Cargo.toml (e.g., 'native/my_nif/Cargo.toml')"
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref_protected == true && github.run_id || github.event.pull_request.number || github.ref }}
-  cancel-in-progress: ${{ github.ref_protected != true }}
-
 env:
   CARGO_TERM_COLOR: always
 
@@ -48,7 +44,6 @@ jobs:
       uses: Swatinem/rust-cache@v2
       with:
         shared-key: ${{ matrix.rust }}-test
-        save-if: ${{ github.ref == 'refs/heads/main' }}
 
     - name: Run tests
       run: cargo nextest run --all-features --manifest-path ${{ inputs.manifest-path }}

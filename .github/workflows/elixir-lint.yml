@@ -7,10 +7,6 @@ on:
         type: string
         default: "[{\"elixir\": \"1.19.x\", \"otp\": \"28.x\"}]"
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref_protected == true && github.run_id || github.event.pull_request.number || github.ref }}
-  cancel-in-progress: ${{ github.ref_protected != true }}
-
 env:
   MIX_ENV: test
 
@@ -57,7 +53,7 @@ jobs:
     - name: Disable compile warnings
       run: echo "::remove-matcher owner=elixir-mixCompileWarning::"
 
-    - name: Retrieve mix dependencies cache
+    - name: Cache mix dependencies
       uses: actions/cache@v4
       id: mix-cache
       with:
@@ -66,7 +62,6 @@ jobs:
           _build
         key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-mix-${{ hashFiles('**/mix.lock') }}
         restore-keys: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-mix-
-        save-always: ${{ github.ref == 'refs/heads/main' }}
 
     - name: Install mix dependencies
       if: steps.mix-cache.outputs.cache-hit != 'true'
