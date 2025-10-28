@@ -97,20 +97,20 @@ jobs:
 Build and release precompiled NIFs for multiple platforms:
 
 ```yaml
-name: Release
+name: NIF Release
 
 on:
   push:
     branches: [main]
-    paths: ["native/**", ".github/workflows/release.yml"]
+    paths: ["native/**", ".github/workflows/nif-release.yml"]
     tags: ["*"]
   pull_request:
-    paths: [".github/workflows/release.yml"]
+    paths: [".github/workflows/nif-release.yml"]
   workflow_dispatch:
 
 jobs:
   release:
-    uses: leandrocp/github-actions/.github/workflows/nif_release.yml@main
+    uses: leandrocp/github-actions/.github/workflows/nif-release.yml@main
     with:
       project-name: my_nif
       project-dir: native/my_nif
@@ -121,7 +121,7 @@ Customize NIF versions:
 ```yaml
 jobs:
   release:
-    uses: leandrocp/github-actions/.github/workflows/nif_release.yml@main
+    uses: leandrocp/github-actions/.github/workflows/nif-release.yml@main
     with:
       project-name: my_nif
       project-dir: native/my_nif
