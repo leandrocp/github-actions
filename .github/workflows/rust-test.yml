@@ -14,12 +14,17 @@ on:
         default: "Cargo.toml"
         description: "Path to Cargo.toml (e.g., 'native/my_nif/Cargo.toml')"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_protected == true && github.run_id || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref_protected != true }}
+
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
   test:
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -34,11 +39,16 @@ jobs:
       with:
         toolchain: ${{ matrix.rust }}
 
+    - name: Install cargo-nextest
+      uses: taiki-e/install-action@v2
+      with:
+        tool: cargo-nextest
+
     - name: Cache Rust
       uses: Swatinem/rust-cache@v2
-
-    - name: Build
-      run: cargo build --verbose --manifest-path ${{ inputs.manifest-path }}
+      with:
+        shared-key: ${{ matrix.rust }}-test
+        save-if: ${{ github.ref == 'refs/heads/main' }}
 
     - name: Run tests
-      run: cargo test --all-features --manifest-path ${{ inputs.manifest-path }}
+      run: cargo nextest run --all-features --manifest-path ${{ inputs.manifest-path }}

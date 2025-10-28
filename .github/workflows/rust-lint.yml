@@ -11,12 +11,18 @@ on:
         default: "Cargo.toml"
         description: "Path to Cargo.toml (e.g., 'native/my_nif/Cargo.toml')"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_protected == true && github.run_id || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref_protected != true }}
+
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  lint:
+  format:
+    name: Check formatting
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
@@ -29,13 +35,34 @@ jobs:
       uses: dtolnay/rust-toolchain@master
       with:
         toolchain: ${{ matrix.rust }}
-        components: rustfmt, clippy
-
-    - name: Cache Rust
-      uses: Swatinem/rust-cache@v2
+        components: rustfmt
 
     - name: Check formatting
       run: cargo fmt --manifest-path ${{ inputs.manifest-path }} -- --check
+
+  clippy:
+    name: Run clippy
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        rust: ${{ fromJSON(inputs.rust-versions) }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+
+    - name: Setup Rust
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: ${{ matrix.rust }}
+        components: clippy
+
+    - name: Cache Rust
+      uses: Swatinem/rust-cache@v2
+      with:
+        shared-key: ${{ matrix.rust }}-lint
+        save-if: ${{ github.ref == 'refs/heads/main' }}
 
     - name: Run clippy
       run: cargo clippy --all-targets --all-features --manifest-path ${{ inputs.manifest-path }} -- -D warnings

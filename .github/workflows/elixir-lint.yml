@@ -7,12 +7,39 @@ on:
         type: string
         default: "[{\"elixir\": \"1.19.x\", \"otp\": \"28.x\"}]"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_protected == true && github.run_id || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref_protected != true }}
+
 env:
   MIX_ENV: test
 
 jobs:
-  lint:
+  format:
+    name: Check formatting
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(inputs.pairs) }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+
+    - name: Setup Elixir
+      uses: erlef/setup-beam@v1
+      with:
+        elixir-version: ${{ matrix.elixir }}
+        otp-version: ${{ matrix.otp }}
+
+    - name: Check formatting
+      run: mix format --check-formatted
+
+  lint:
+    name: Compile and check dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -39,6 +66,7 @@ jobs:
           _build
         key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-mix-${{ hashFiles('**/mix.lock') }}
         restore-keys: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-mix-
+        save-always: ${{ github.ref == 'refs/heads/main' }}
 
     - name: Install mix dependencies
       if: steps.mix-cache.outputs.cache-hit != 'true'
@@ -51,6 +79,3 @@ jobs:
 
     - name: Check for unused dependencies
       run: mix deps.unlock --check-unused
-
-    - name: Check formatting
-      run: mix format --check-formatted
