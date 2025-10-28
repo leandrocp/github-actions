@@ -12,7 +12,7 @@ env:
 
 jobs:
   lint:
-    name: Compile and check dependencies
+    name: lint (otp ${{ matrix.otp }}, elixir ${{ matrix.elixir }})
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:

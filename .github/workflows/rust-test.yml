@@ -19,6 +19,7 @@ env:
 
 jobs:
   test:
+    name: test (os ${{ matrix.os }}, rust ${{ matrix.rust }})
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     strategy:

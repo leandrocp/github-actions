@@ -15,29 +15,8 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  format:
-    name: Check formatting
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    strategy:
-      fail-fast: false
-      matrix:
-        rust: ${{ fromJSON(inputs.rust-versions) }}
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v5
-
-    - name: Setup Rust
-      uses: dtolnay/rust-toolchain@master
-      with:
-        toolchain: ${{ matrix.rust }}
-        components: rustfmt
-
-    - name: Check formatting
-      run: cargo fmt --manifest-path ${{ inputs.manifest-path }} -- --check
-
-  clippy:
-    name: Run clippy
+  lint:
+    name: lint (rust ${{ matrix.rust }})
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
@@ -61,3 +40,6 @@ jobs:
 
     - name: Run clippy
       run: cargo clippy --all-targets --all-features --manifest-path ${{ inputs.manifest-path }} -- -D warnings
+
+    - name: Check formatting
+      run: cargo fmt --manifest-path ${{ inputs.manifest-path }} -- --check
