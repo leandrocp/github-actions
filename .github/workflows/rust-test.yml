@@ -36,6 +36,17 @@ jobs:
       with:
         toolchain: ${{ matrix.rust }}
 
+    - name: Determine workspace directory
+      id: workspace
+      shell: bash
+      run: |
+        MANIFEST_PATH="${{ inputs.manifest-path }}"
+        if [ "$MANIFEST_PATH" = "Cargo.toml" ]; then
+          echo "dir=." >> $GITHUB_OUTPUT
+        else
+          echo "dir=$(dirname $MANIFEST_PATH)" >> $GITHUB_OUTPUT
+        fi
+
     - name: Install cargo-nextest
       uses: taiki-e/install-action@v2
       with:
@@ -45,6 +56,8 @@ jobs:
       uses: Swatinem/rust-cache@v2
       with:
         shared-key: ${{ matrix.rust }}-test
+        workspaces: ${{ steps.workspace.outputs.dir }}
 
     - name: Run tests
-      run: cargo nextest run --all-features --manifest-path ${{ inputs.manifest-path }}
+      working-directory: ${{ steps.workspace.outputs.dir }}
+      run: cargo nextest run --all-features

@@ -33,13 +33,27 @@ jobs:
         toolchain: ${{ matrix.rust }}
         components: rustfmt, clippy
 
+    - name: Determine workspace directory
+      id: workspace
+      shell: bash
+      run: |
+        MANIFEST_PATH="${{ inputs.manifest-path }}"
+        if [ "$MANIFEST_PATH" = "Cargo.toml" ]; then
+          echo "dir=." >> $GITHUB_OUTPUT
+        else
+          echo "dir=$(dirname $MANIFEST_PATH)" >> $GITHUB_OUTPUT
+        fi
+
     - name: Cache Rust
       uses: Swatinem/rust-cache@v2
       with:
         shared-key: ${{ matrix.rust }}-lint
+        workspaces: ${{ steps.workspace.outputs.dir }}
 
     - name: Run clippy
-      run: cargo clippy --all-targets --all-features --manifest-path ${{ inputs.manifest-path }} -- -D warnings
+      working-directory: ${{ steps.workspace.outputs.dir }}
+      run: cargo clippy --all-targets --all-features -- -D warnings
 
     - name: Check formatting
-      run: cargo fmt --manifest-path ${{ inputs.manifest-path }} -- --check
+      working-directory: ${{ steps.workspace.outputs.dir }}
+      run: cargo fmt -- --check
