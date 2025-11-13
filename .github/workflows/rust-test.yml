@@ -3,12 +3,14 @@ name: Rust - Test
 on:
   workflow_call:
     inputs:
-      os-versions:
+      stable-os-versions:
         type: string
-        default: "[\"ubuntu-latest\", \"windows-latest\", \"macos-latest\"]"
-      rust-versions:
+        default: '["ubuntu-22.04", "windows-2022", "macos-14"]'
+        description: "OS versions to test with rust stable"
+      nightly-os-versions:
         type: string
-        default: "[\"stable\", \"nightly\"]"
+        default: '["ubuntu-latest", "windows-latest", "macos-latest"]'
+        description: "OS versions to test with rust nightly"
       manifest-path:
         type: string
         default: "Cargo.toml"
@@ -18,15 +20,14 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  test:
-    name: test (os ${{ matrix.os }}, rust ${{ matrix.rust }})
+  test-stable:
+    name: test (os ${{ matrix.os }}, rust stable)
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
-        os: ${{ fromJSON(inputs.os-versions) }}
-        rust: ${{ fromJSON(inputs.rust-versions) }}
+        os: ${{ fromJSON(inputs.stable-os-versions) }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v5
@@ -34,7 +35,7 @@ jobs:
     - name: Setup Rust
       uses: dtolnay/rust-toolchain@master
       with:
-        toolchain: ${{ matrix.rust }}
+        toolchain: stable
 
     - name: Install cargo-nextest
       uses: taiki-e/install-action@v2
@@ -44,7 +45,37 @@ jobs:
     - name: Cache Rust
       uses: Swatinem/rust-cache@v2
       with:
-        shared-key: ${{ matrix.rust }}-test
+        shared-key: stable-test
+
+    - name: Run tests
+      run: cargo nextest run --all-features --manifest-path ${{ inputs.manifest-path }}
+
+  test-nightly:
+    name: test (os ${{ matrix.os }}, rust nightly)
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ${{ fromJSON(inputs.nightly-os-versions) }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+
+    - name: Setup Rust
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: nightly
+
+    - name: Install cargo-nextest
+      uses: taiki-e/install-action@v2
+      with:
+        tool: cargo-nextest
+
+    - name: Cache Rust
+      uses: Swatinem/rust-cache@v2
+      with:
+        shared-key: nightly-test
 
     - name: Run tests
       run: cargo nextest run --all-features --manifest-path ${{ inputs.manifest-path }}
