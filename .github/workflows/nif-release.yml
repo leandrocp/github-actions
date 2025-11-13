@@ -58,12 +58,12 @@ jobs:
         shell: bash
         run: |
           # Get the project version from mix.exs
-          echo "PROJECT_VERSION=$(sed -n 's/^  @version "\(.*\)"/\1/p' mix.exs | head -n1)" >> $GITHUB_ENV
+          echo "PROJECT_VERSION=$(sed -n 's/^  @version "\(.*\)"/\1/p' mix.exs | head -n1)" >> "$GITHUB_ENV"
 
       - name: Maybe add Rust flags for compilation
         shell: bash
         run: |
-          echo "RUSTFLAGS=${{ matrix.job.rustflags }}" >> $GITHUB_ENV
+          echo "RUSTFLAGS=${{ matrix.job.rustflags }}" >> "$GITHUB_ENV"
         if: ${{ matrix.job.rustflags }}
 
       - name: Add target
