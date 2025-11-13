@@ -26,8 +26,13 @@ All workflows are reusable (`on: workflow_call`) and located in `.github/workflo
    - Rust: Tests against stable/beta/nightly and ubuntu/windows/macos by default
 
 2. **Customizable Inputs**: All workflows accept version arrays as JSON strings
-   - Example: `elixirs: '["1.17.x", "1.18.x"]'`
+   - Example: `pairs: '[{"elixir": "1.17.x", "otp": "27.x"}]'`
    - Example: `rust-versions: '["stable", "nightly"]'`
+
+3. **Custom Environment Variables**: Elixir workflows support additional environment variables
+   - Accepts JSON object via `env_vars` input
+   - Example: `env_vars: '{"MDEX_BUILD": "1"}'`
+   - Useful for projects requiring special compilation flags (e.g., forcing NIF builds)
 
 ## Development
 
@@ -36,4 +41,5 @@ All workflows are reusable (`on: workflow_call`) and located in `.github/workflo
 ## Fetch links for extra context
 
 - https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax
+- https://docs.github.com/en/actions/reference/workflows-and-actions/reusing-workflow-configurations
 - https://learnxinyminutes.com/yaml

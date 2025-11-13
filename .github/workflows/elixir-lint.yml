@@ -6,6 +6,10 @@ on:
       pairs:
         type: string
         default: "[{\"elixir\": \"1.19.x\", \"otp\": \"28.x\"}]"
+      env_vars:
+        type: string
+        default: "{}"
+        description: "Additional environment variables as JSON object (e.g., '{\"MDEX_BUILD\": \"1\"}')"
 
 env:
   MIX_ENV: test
@@ -15,6 +19,7 @@ jobs:
     name: lint (otp ${{ matrix.otp }}, elixir ${{ matrix.elixir }})
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env: ${{ fromJSON(inputs.env_vars) }}
     strategy:
       fail-fast: false
       matrix:

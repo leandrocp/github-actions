@@ -42,8 +42,21 @@ jobs:
   lint:
     uses: leandrocp/github-actions/.github/workflows/elixir-lint.yml@main
     with:
-      elixirs: '["1.18.x"]'
-      erlangs: '["28.x"]'
+      pairs: '[{"elixir": "1.18.x", "otp": "28.x"}]'
+```
+
+Pass custom environment variables (useful for NIFs or special build requirements):
+
+```yaml
+jobs:
+  test:
+    uses: leandrocp/github-actions/.github/workflows/elixir-test.yml@main
+    with:
+      env_vars: '{"MDEX_BUILD": "1"}'
+  lint:
+    uses: leandrocp/github-actions/.github/workflows/elixir-lint.yml@main
+    with:
+      env_vars: '{"MDEX_BUILD": "1", "CUSTOM_VAR": "value"}'
 ```
 
 ## Usage: Rust
