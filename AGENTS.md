@@ -29,6 +29,10 @@ All workflows are reusable (`on: workflow_call`) and located in `.github/workflo
    - Example: `elixirs: '["1.17.x", "1.18.x"]'`
    - Example: `rust-versions: '["stable", "nightly"]'`
 
+## Development
+
+- Run `actionlint` to validate workflow syntax and content
+
 ## Fetch links for extra context
 
 - https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax

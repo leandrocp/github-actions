@@ -48,6 +48,8 @@ jobs:
 
 ## Usage: Rust
 
+Basic usage with default settings:
+
 ```yaml
 name: Rust CI
 
@@ -64,28 +66,45 @@ jobs:
     uses: leandrocp/github-actions/.github/workflows/rust-lint.yml@main
 ```
 
-Customize the Rust versions:
+### Default Test Strategy
 
+Tests run in two separate job groups:
+- **`test-stable`**: Rust stable on proven LTS OS versions
+  - ubuntu-22.04, windows-2022, macos-14 (3 jobs)
+- **`test-nightly`**: Rust nightly on latest OS versions
+  - ubuntu-latest, windows-latest, macos-latest (3 jobs)
+
+Total: 6 test jobs by default.
+
+### Customization Examples
+
+**Test only stable (skip nightly):**
 ```yaml
 jobs:
   test:
     uses: leandrocp/github-actions/.github/workflows/rust-test.yml@main
     with:
-      rust-versions: '["stable", "nightly"]'
-  lint:
-    uses: leandrocp/github-actions/.github/workflows/rust-lint.yml@main
-    with:
-      rust-versions: '["stable"]'
+      nightly-os-versions: '[]'
 ```
 
-Use with Rust NIFs (custom manifest path):
+**Test on specific OS versions:**
+```yaml
+jobs:
+  test:
+    uses: leandrocp/github-actions/.github/workflows/rust-test.yml@main
+    with:
+      stable-os-versions: '["ubuntu-22.04"]'
+      nightly-os-versions: '["ubuntu-latest", "macos-latest"]'
+```
 
+**Use with Rust NIFs (custom manifest path):**
 ```yaml
 jobs:
   test:
     uses: leandrocp/github-actions/.github/workflows/rust-test.yml@main
     with:
       manifest-path: 'native/my_nif/Cargo.toml'
+      stable-os-versions: '["ubuntu-22.04", "macos-14"]'
   lint:
     uses: leandrocp/github-actions/.github/workflows/rust-lint.yml@main
     with:
