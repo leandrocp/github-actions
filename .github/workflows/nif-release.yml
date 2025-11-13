@@ -87,9 +87,8 @@ jobs:
           target: ${{ matrix.job.target }}
           nif-version: ${{ matrix.nif }}
           use-cross: ${{ matrix.job.use-cross }}
-          cross-version: ${{ matrix.job.cross-version || 'from-source' }}
+          cross-version: 'from-source'
           project-dir: ${{ inputs.project-dir }}
-          cargo-args: ${{ matrix.job.cargo-args }}
           variant: ${{ matrix.job.variant }}
 
       - name: Artifact attestation
