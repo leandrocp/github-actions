@@ -10,6 +10,10 @@ on:
         type: string
         default: "Cargo.toml"
         description: "Path to Cargo.toml (e.g., 'native/my_nif/Cargo.toml')"
+      msrv:
+        type: string
+        default: ""
+        description: "Minimum Supported Rust Version (e.g., '1.70')"
 
 env:
   CARGO_TERM_COLOR: always
@@ -43,3 +47,23 @@ jobs:
 
     - name: Check formatting
       run: cargo fmt --manifest-path ${{ inputs.manifest-path }} -- --check
+
+  msrv:
+    name: Verify MSRV
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: inputs.msrv != ''
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+
+    - name: Setup Rust
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: stable
+
+    - name: Install cargo-msrv
+      run: cargo install cargo-msrv --locked
+
+    - name: Verify MSRV
+      run: cargo msrv verify --manifest-path ${{ inputs.manifest-path }} -- cargo check

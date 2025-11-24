@@ -124,6 +124,15 @@ jobs:
       manifest-path: 'native/my_nif/Cargo.toml'
 ```
 
+**Verify Minimum Supported Rust Version (MSRV):**
+```yaml
+jobs:
+  lint:
+    uses: leandrocp/github-actions/.github/workflows/rust-lint.yml@main
+    with:
+      msrv: '1.70'
+```
+
 ## Usage: NIF Release
 
 Build and release precompiled NIFs for multiple platforms:
