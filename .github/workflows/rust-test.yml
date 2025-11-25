@@ -30,7 +30,7 @@ jobs:
         os: ${{ fromJSON(inputs.stable-os-versions) }}
     steps:
     - name: Checkout code
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
 
     - name: Setup Rust
       uses: dtolnay/rust-toolchain@master
@@ -60,7 +60,7 @@ jobs:
         os: ${{ fromJSON(inputs.nightly-os-versions) }}
     steps:
     - name: Checkout code
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
 
     - name: Setup Rust
       uses: dtolnay/rust-toolchain@master
