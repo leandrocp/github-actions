@@ -15,6 +15,10 @@ on:
         type: string
         default: "Cargo.toml"
         description: "Path to Cargo.toml (e.g., 'native/my_nif/Cargo.toml')"
+      msrv:
+        type: string
+        default: ""
+        description: "Minimum Supported Rust Version (e.g., '1.82.0')"
 
 env:
   CARGO_TERM_COLOR: always
@@ -24,6 +28,7 @@ jobs:
     name: test (os ${{ matrix.os }}, rust stable)
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
+    if: inputs.msrv == ''
     strategy:
       fail-fast: false
       matrix:
@@ -46,6 +51,37 @@ jobs:
       uses: Swatinem/rust-cache@v2
       with:
         shared-key: stable-test
+
+    - name: Run tests
+      run: cargo nextest run --all-features --manifest-path ${{ inputs.manifest-path }}
+
+  test-msrv:
+    name: test (os ${{ matrix.os }}, rust ${{ inputs.msrv }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    if: inputs.msrv != ''
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ${{ fromJSON(inputs.stable-os-versions) }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+
+    - name: Setup Rust
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: ${{ inputs.msrv }}
+
+    - name: Install cargo-nextest
+      uses: taiki-e/install-action@v2
+      with:
+        tool: cargo-nextest
+
+    - name: Cache Rust
+      uses: Swatinem/rust-cache@v2
+      with:
+        shared-key: msrv-test
 
     - name: Run tests
       run: cargo nextest run --all-features --manifest-path ${{ inputs.manifest-path }}

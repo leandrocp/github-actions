@@ -89,6 +89,12 @@ Tests run in two separate job groups:
 
 Total: 6 test jobs by default.
 
+**MSRV Testing:** When you specify an MSRV (Minimum Supported Rust Version), tests run on:
+- **`test-msrv`**: Specified MSRV version on LTS OS versions (replaces test-stable)
+- **`test-nightly`**: Rust nightly on latest OS versions
+
+This ensures compatibility with your project's minimum supported Rust version.
+
 ### Customization Examples
 
 **Test only stable (skip nightly):**
@@ -124,14 +130,20 @@ jobs:
       manifest-path: 'native/my_nif/Cargo.toml'
 ```
 
-**Verify Minimum Supported Rust Version (MSRV):**
+**Test and verify Minimum Supported Rust Version (MSRV):**
 ```yaml
 jobs:
+  test:
+    uses: leandrocp/github-actions/.github/workflows/rust-test.yml@main
+    with:
+      msrv: '1.82.0'
   lint:
     uses: leandrocp/github-actions/.github/workflows/rust-lint.yml@main
     with:
-      msrv: '1.70'
+      msrv: '1.82.0'
 ```
+
+This runs tests on MSRV + nightly (instead of stable + nightly), and verifies that your Cargo.toml's `rust-version` field matches the MSRV.
 
 ## Usage: NIF Release
 
