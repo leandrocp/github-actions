@@ -63,7 +63,9 @@ jobs:
         toolchain: stable
 
     - name: Install cargo-msrv
-      run: cargo install cargo-msrv --locked
+      uses: taiki-e/install-action@v2
+      with:
+        tool: cargo-msrv
 
     - name: Verify MSRV
       run: cargo msrv verify --manifest-path ${{ inputs.manifest-path }} -- cargo check
