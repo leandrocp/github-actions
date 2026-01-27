@@ -28,7 +28,6 @@ jobs:
     name: test (os ${{ matrix.os }}, rust stable)
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
-    if: inputs.msrv == ''
     strategy:
       fail-fast: false
       matrix:
