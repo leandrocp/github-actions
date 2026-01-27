@@ -3,6 +3,10 @@ name: Elixir - Lint
 on:
   workflow_call:
     inputs:
+      working-directory:
+        type: string
+        default: "."
+        description: "Working directory for mix commands"
       pairs:
         type: string
         default: "[{\"elixir\": \"1.19.x\", \"otp\": \"28.x\"}]"
@@ -20,6 +24,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env: ${{ fromJSON(inputs.env_vars) }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
     strategy:
       fail-fast: false
       matrix:
@@ -42,9 +49,9 @@ jobs:
       id: mix-cache
       with:
         path: |
-          deps
-          _build
-        key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-mix-${{ hashFiles('**/mix.lock') }}
+          ${{ inputs.working-directory }}/deps
+          ${{ inputs.working-directory }}/_build
+        key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-mix-${{ hashFiles(format('{0}/mix.lock', inputs.working-directory)) }}
         restore-keys: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-mix-
 
     - name: Install mix dependencies
