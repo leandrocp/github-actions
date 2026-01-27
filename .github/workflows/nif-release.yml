@@ -15,6 +15,10 @@ on:
         type: string
         default: '["2.15"]'
         description: "NIF versions to build for"
+      working-directory:
+        type: string
+        default: "."
+        description: "Directory containing mix.exs (e.g., 'packages/elixir/my_app')"
 
 jobs:
   build:
@@ -56,6 +60,7 @@ jobs:
 
       - name: Extract crate information
         shell: bash
+        working-directory: ${{ inputs.working-directory }}
         run: |
           # Get the project version from mix.exs
           echo "PROJECT_VERSION=$(sed -n 's/^  @version "\(.*\)"/\1/p' mix.exs | head -n1)" >> "$GITHUB_ENV"
