@@ -9,7 +9,7 @@ on:
         description: "Working directory for mix commands"
       pairs:
         type: string
-        default: "[{\"elixir\": \"1.15.0\", \"otp\": \"25.1\"}, {\"elixir\": \"1.19.x\", \"otp\": \"28.x\"}]"
+        default: "[{\"elixir\": \"1.15.0\", \"otp\": \"25.1\"}, {\"elixir\": \"1.19.x\", \"otp\": \"28.x\"}, {\"elixir\": \"main-otp-28\", \"otp\": \"maint-28\"}]"
       env_vars:
         type: string
         default: "{}"
