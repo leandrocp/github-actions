@@ -8,7 +8,7 @@ Used by:
 - https://github.com/leandrocp/mdex
 - https://github.com/leandrocp/mdex_gfm
 - https://github.com/leandrocp/mdex_mermaid
-- - https://github.com/leandrocp/mdex_katex
+- https://github.com/leandrocp/mdex_katex
 - https://github.com/leandrocp/lumis
 - https://github.com/leandrocp/req_embed
 - https://github.com/leandrocp/err
