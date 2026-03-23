@@ -14,6 +14,10 @@ on:
         type: string
         default: "{}"
         description: "Additional environment variables as JSON object (e.g., '{\"MDEX_BUILD\": \"1\"}')"
+      rust-toolchain:
+        type: string
+        default: ""
+        description: "Optional Rust toolchain to install before setup-command runs"
       setup-command:
         type: string
         default: ""
@@ -44,6 +48,12 @@ jobs:
       with:
         elixir-version: ${{ matrix.elixir }}
         otp-version: ${{ matrix.otp }}
+
+    - name: Setup Rust
+      if: inputs.rust-toolchain != ''
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: ${{ inputs.rust-toolchain }}
 
     - name: Run setup command
       if: inputs.setup-command != ''
