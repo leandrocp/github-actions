@@ -14,6 +14,10 @@ on:
         type: string
         default: "{}"
         description: "Additional environment variables as JSON object (e.g., '{\"MDEX_BUILD\": \"1\"}')"
+      setup-command:
+        type: string
+        default: ""
+        description: "Optional shell command to run after checkout and before Mix commands"
 
 env:
   MIX_ENV: test
@@ -41,6 +45,10 @@ jobs:
       with:
         elixir-version: ${{ matrix.elixir }}
         otp-version: ${{ matrix.otp }}
+
+    - name: Run setup command
+      if: inputs.setup-command != ''
+      run: ${{ inputs.setup-command }}
 
     - name: Disable compile warnings
       run: echo "::remove-matcher owner=elixir-mixCompileWarning::"
