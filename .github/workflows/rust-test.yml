@@ -15,10 +15,6 @@ on:
         type: string
         default: "Cargo.toml"
         description: "Path to Cargo.toml (e.g., 'native/my_nif/Cargo.toml')"
-      setup-command:
-        type: string
-        default: ""
-        description: "Optional shell command to run after checkout and before tests"
       msrv:
         type: string
         default: ""
@@ -50,14 +46,15 @@ jobs:
       with:
         tool: cargo-nextest
 
+    - name: Install just
+      uses: taiki-e/install-action@v2
+      with:
+        tool: just
+
     - name: Cache Rust
       uses: Swatinem/rust-cache@v2
       with:
         shared-key: stable-test
-
-    - name: Run setup command
-      if: inputs.setup-command != ''
-      run: ${{ inputs.setup-command }}
 
     - name: Run tests
       run: cargo nextest run --all-features --manifest-path ${{ inputs.manifest-path }}
@@ -85,14 +82,15 @@ jobs:
       with:
         tool: cargo-nextest
 
+    - name: Install just
+      uses: taiki-e/install-action@v2
+      with:
+        tool: just
+
     - name: Cache Rust
       uses: Swatinem/rust-cache@v2
       with:
         shared-key: msrv-test
-
-    - name: Run setup command
-      if: inputs.setup-command != ''
-      run: ${{ inputs.setup-command }}
 
     - name: Run tests
       run: cargo nextest run --all-features --manifest-path ${{ inputs.manifest-path }}
@@ -119,14 +117,15 @@ jobs:
       with:
         tool: cargo-nextest
 
+    - name: Install just
+      uses: taiki-e/install-action@v2
+      with:
+        tool: just
+
     - name: Cache Rust
       uses: Swatinem/rust-cache@v2
       with:
         shared-key: nightly-test
-
-    - name: Run setup command
-      if: inputs.setup-command != ''
-      run: ${{ inputs.setup-command }}
 
     - name: Run tests
       run: cargo nextest run --all-features --manifest-path ${{ inputs.manifest-path }}

@@ -17,11 +17,7 @@ on:
       rust-toolchain:
         type: string
         default: ""
-        description: "Optional Rust toolchain to install before setup-command runs"
-      setup-command:
-        type: string
-        default: ""
-        description: "Optional shell command to run after checkout and before Mix commands"
+        description: "Optional Rust toolchain to install for jobs that compile Rust or NIF code"
 
 env:
   MIX_ENV: test
@@ -56,9 +52,10 @@ jobs:
       with:
         toolchain: ${{ inputs.rust-toolchain }}
 
-    - name: Run setup command
-      if: inputs.setup-command != ''
-      run: ${{ inputs.setup-command }}
+    - name: Install just
+      uses: taiki-e/install-action@v2
+      with:
+        tool: just
 
     - name: Disable compile warnings
       run: echo "::remove-matcher owner=elixir-mixCompileWarning::"
