@@ -10,6 +10,10 @@ on:
         type: string
         default: "Cargo.toml"
         description: "Path to Cargo.toml (e.g., 'native/my_nif/Cargo.toml')"
+      setup-command:
+        type: string
+        default: ""
+        description: "Optional shell command to run after checkout and before lint/MSRV"
       msrv:
         type: string
         default: ""
@@ -42,6 +46,10 @@ jobs:
       with:
         shared-key: ${{ matrix.rust }}-lint
 
+    - name: Run setup command
+      if: inputs.setup-command != ''
+      run: ${{ inputs.setup-command }}
+
     - name: Run clippy
       run: cargo clippy --all-targets --all-features --manifest-path ${{ inputs.manifest-path }} -- -D warnings
 
@@ -66,6 +74,10 @@ jobs:
       uses: taiki-e/install-action@v2
       with:
         tool: cargo-msrv
+
+    - name: Run setup command
+      if: inputs.setup-command != ''
+      run: ${{ inputs.setup-command }}
 
     - name: Verify MSRV
       run: cargo msrv verify --manifest-path ${{ inputs.manifest-path }} -- cargo check
