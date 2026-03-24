@@ -51,7 +51,7 @@ jobs:
       run: cargo clippy --all-targets --all-features --manifest-path ${{ inputs.manifest-path }} -- -D warnings
 
     - name: Check formatting
-      run: cargo fmt --manifest-path ${{ inputs.manifest-path }} -- --check
+      run: cargo fmt --all --manifest-path ${{ inputs.manifest-path }} -- --check
 
   msrv:
     name: msrv
@@ -65,12 +65,7 @@ jobs:
     - name: Setup Rust
       uses: dtolnay/rust-toolchain@master
       with:
-        toolchain: stable
-
-    - name: Install cargo-msrv
-      uses: taiki-e/install-action@v2
-      with:
-        tool: cargo-msrv
+        toolchain: ${{ inputs.msrv }}
 
     - name: Install just
       uses: taiki-e/install-action@v2
@@ -78,4 +73,4 @@ jobs:
         tool: just
 
     - name: Verify MSRV
-      run: cargo msrv verify --manifest-path ${{ inputs.manifest-path }} -- cargo check
+      run: cargo check --manifest-path ${{ inputs.manifest-path }}
