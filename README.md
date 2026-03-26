@@ -59,6 +59,17 @@ jobs:
       env_vars: '{"MDEX_BUILD": "1", "CUSTOM_VAR": "value"}'
 ```
 
+Enable optional Credo checks and pass extra arguments when needed:
+
+```yaml
+jobs:
+  lint:
+    uses: leandrocp/github-actions/.github/workflows/elixir-lint.yml@main
+    with:
+      credo: true
+      credo_args: "--strict"
+```
+
 ## Usage: Rust
 
 Basic usage with default settings:

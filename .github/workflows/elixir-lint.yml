@@ -14,6 +14,14 @@ on:
         type: string
         default: "{}"
         description: "Additional environment variables as JSON object (e.g., '{\"MDEX_BUILD\": \"1\"}')"
+      credo:
+        type: boolean
+        default: false
+        description: "Run Credo as an optional lint step"
+      credo_args:
+        type: string
+        default: ""
+        description: "Additional arguments passed to `mix credo` (e.g., '--strict')"
       rust-toolchain:
         type: string
         default: ""
@@ -83,3 +91,7 @@ jobs:
 
     - name: Check formatting
       run: mix format --check-formatted
+
+    - name: Run Credo
+      if: inputs.credo
+      run: mix credo ${{ inputs.credo_args }}
