@@ -1,0 +1,52 @@
+name: Hex Publish
+
+on:
+  workflow_call:
+    inputs:
+      working-directory:
+        type: string
+        default: "."
+        description: "Working directory for mix commands"
+      elixir-version:
+        type: string
+        default: "1.19"
+        description: "Elixir version used to publish"
+      otp-version:
+        type: string
+        default: "28"
+        description: "OTP version used to publish"
+      publish-command:
+        type: string
+        default: "mix hex.publish --yes"
+        description: "Command used to publish the package"
+    secrets:
+      HEX_API_KEY:
+        required: true
+
+jobs:
+  publish:
+    name: Publish to Hex
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Setup Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: ${{ inputs.otp-version }}
+          elixir-version: ${{ inputs.elixir-version }}
+
+      - name: Fetch dependencies
+        run: mix deps.get
+
+      - name: Publish to Hex
+        run: ${{ inputs.publish-command }}
+        env:
+          HEX_API_KEY: ${{ secrets.HEX_API_KEY }}

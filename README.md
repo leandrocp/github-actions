@@ -1,6 +1,6 @@
 # GitHub Actions for Elixir and Rust CI
 
-Reusable GitHub Actions workflows for testing and linting Elixir and Rust projects.
+Reusable GitHub Actions workflows for testing, linting, and releasing Elixir and Rust projects.
 
 Initially based on [mtrudel/elixir-ci-actions](https://github.com/mtrudel/elixir-ci-actions).
 
@@ -190,4 +190,36 @@ jobs:
       project-name: my_nif
       project-dir: native/my_nif
       nif-versions: '["2.15", "2.16"]'
+```
+
+## Usage: Hex Publish
+
+Keep the trigger in the consumer repo and call the reusable workflow from here:
+
+```yaml
+name: Publish
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+jobs:
+  publish:
+    uses: leandrocp/github-actions/.github/workflows/hex-publish.yml@main
+    secrets: inherit
+```
+
+Customize versions or publish command when needed:
+
+```yaml
+jobs:
+  publish:
+    uses: leandrocp/github-actions/.github/workflows/hex-publish.yml@main
+    with:
+      elixir-version: "1.19"
+      otp-version: "28"
+      working-directory: "."
+      publish-command: "mix hex.publish --yes"
+    secrets: inherit
 ```
