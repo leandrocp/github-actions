@@ -71,6 +71,17 @@ jobs:
       credo_args: "--strict"
 ```
 
+Install Rust for Elixir jobs that compile Rust or NIF code:
+
+```yaml
+jobs:
+  lint:
+    uses: leandrocp/github-actions/.github/workflows/elixir-lint.yml@main
+    with:
+      rust-toolchain: stable
+      env_vars: '{"MIX_ENV": "test", "MDEX_BUILD": "1"}'
+```
+
 ## Usage: Rust
 
 Basic usage with default settings:
@@ -222,5 +233,20 @@ jobs:
       otp-version: "28"
       working-directory: "."
       publish-command: "mix hex.publish --yes"
+    secrets: inherit
+```
+
+Use extra environment variables, install Rust, or run a pre-publish step when publishing packages that build Rust or NIF code:
+
+```yaml
+jobs:
+  publish:
+    uses: leandrocp/github-actions/.github/workflows/hex-publish.yml@main
+    with:
+      working-directory: "."
+      env-vars: '{"MDEX_BUILD": "1"}'
+      install-rust: true
+      rust-version: stable
+      pre-publish-command: "mix deps.compile"
     secrets: inherit
 ```
