@@ -7,6 +7,10 @@ on:
         type: string
         default: "."
         description: "Working directory for mix commands"
+      env-vars:
+        type: string
+        default: "{}"
+        description: "JSON object with extra environment variables"
       elixir-version:
         type: string
         default: "1.19"
@@ -15,6 +19,18 @@ on:
         type: string
         default: "28"
         description: "OTP version used to publish"
+      install-rust:
+        type: boolean
+        default: false
+        description: "Install Rust before publishing"
+      rust-version:
+        type: string
+        default: "stable"
+        description: "Rust toolchain version used when install-rust is enabled"
+      pre-publish-command:
+        type: string
+        default: ""
+        description: "Optional command run before publish-command"
       publish-command:
         type: string
         default: "mix hex.publish --yes"
@@ -37,6 +53,19 @@ jobs:
         with:
           ref: ${{ github.ref }}
 
+      - name: Export custom environment variables
+        if: inputs.env-vars != '{}'
+        env:
+          INPUT_ENV_VARS: ${{ inputs.env-vars }}
+        run: |
+          printf '%s' "$INPUT_ENV_VARS" | jq -r 'to_entries[] | "\(.key)=\(.value)"' >> "$GITHUB_ENV"
+
+      - name: Setup Rust
+        if: inputs.install-rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ inputs.rust-version }}
+
       - name: Setup Elixir
         uses: erlef/setup-beam@v1
         with:
@@ -45,6 +74,10 @@ jobs:
 
       - name: Fetch dependencies
         run: mix deps.get
+
+      - name: Run pre-publish command
+        if: inputs.pre-publish-command != ''
+        run: ${{ inputs.pre-publish-command }}
 
       - name: Publish to Hex
         run: ${{ inputs.publish-command }}
