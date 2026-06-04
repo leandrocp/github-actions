@@ -39,11 +39,11 @@ jobs:
   test:
     uses: leandrocp/github-actions/.github/workflows/elixir-test.yml@main
     with:
-      pairs: '[{"elixir": "1.17.x", "otp": "27.x"}, {"elixir": "1.18.x", "otp": "28.x"}]'
+      pairs: '[{"elixir": "1.17.x", "otp": "27.x"}, {"elixir": "1.20.x", "otp": "29.x"}]'
   lint:
     uses: leandrocp/github-actions/.github/workflows/elixir-lint.yml@main
     with:
-      pairs: '[{"elixir": "1.18.x", "otp": "28.x"}]'
+      pairs: '[{"elixir": "1.20.x", "otp": "29.x"}]'
 ```
 
 Pass custom environment variables (useful for NIFs or special build requirements):
@@ -229,8 +229,8 @@ jobs:
   publish:
     uses: leandrocp/github-actions/.github/workflows/hex-publish.yml@main
     with:
-      elixir-version: "1.19"
-      otp-version: "28"
+      elixir-version: "1.20"
+      otp-version: "29"
       working-directory: "."
       publish-command: "mix hex.publish --yes"
     secrets: inherit

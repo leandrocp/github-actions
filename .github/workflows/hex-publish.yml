@@ -13,11 +13,11 @@ on:
         description: "JSON object with extra environment variables"
       elixir-version:
         type: string
-        default: "1.19"
+        default: "1.20"
         description: "Elixir version used to publish"
       otp-version:
         type: string
-        default: "28"
+        default: "29"
         description: "OTP version used to publish"
       install-rust:
         type: boolean

@@ -26,7 +26,7 @@ The repository also includes **validate.yml**, a repository-level workflow that 
 ### Key Design Patterns
 
 1. **Matrix Testing**: Reusable workflows use strategy matrices where it makes sense
-   - Elixir test: defaults to Elixir 1.19/OTP 28 and `main-otp-28`/`maint-28`
+   - Elixir test: defaults to Elixir 1.20/OTP 29 and `main-otp-29`/`maint-29`
    - Elixir lint: defaults to the same Elixir/OTP pairs and can optionally run Credo
    - Rust test: defaults to stable on LTS runners and nightly on latest runners; when `msrv` is set, an additional MSRV matrix runs on the stable OS set
    - NIF release: builds a target matrix across macOS, Linux, Windows, and FreeBSD targets
