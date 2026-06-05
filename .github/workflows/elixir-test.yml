@@ -9,7 +9,7 @@ on:
         description: "Working directory for mix commands"
       pairs:
         type: string
-        default: "[{\"name\": \"Elixir 1.15.0, OTP 25.1\", \"elixir\": \"1.15.0\", \"otp\": \"25.1\"}, {\"name\": \"Elixir 1.20.x, OTP 29.x\", \"elixir\": \"1.20.x\", \"otp\": \"29.x\"}, {\"name\": \"Elixir main, OTP 29\", \"elixir\": \"main-otp-29\", \"otp\": \"maint-29\"}]"
+        default: "[{\"name\": \"OTP 25.1, Elixir 1.15.0\", \"elixir\": \"1.15.0\", \"otp\": \"25.1\"}, {\"name\": \"OTP 29.x, Elixir 1.20.x\", \"elixir\": \"1.20.x\", \"otp\": \"29.x\"}, {\"name\": \"OTP 29, Elixir main\", \"elixir\": \"main-otp-29\", \"otp\": \"maint-29\"}]"
       env_vars:
         type: string
         default: "{}"
@@ -24,7 +24,7 @@ env:
 
 jobs:
   test:
-    name: ${{ matrix.name || format('Elixir {0}, OTP {1}', matrix.elixir, matrix.otp) }}
+    name: ${{ matrix.name || format('OTP {0}, Elixir {1}', matrix.otp, matrix.elixir) }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env: ${{ fromJSON(inputs.env_vars) }}
