@@ -25,7 +25,7 @@ env:
 
 jobs:
   test-stable:
-    name: test (os ${{ matrix.os }}, rust stable)
+    name: os ${{ matrix.os }}, rust stable
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     strategy:
@@ -60,7 +60,7 @@ jobs:
       run: cargo nextest run --all-features --manifest-path ${{ inputs.manifest-path }}
 
   test-msrv:
-    name: test (os ${{ matrix.os }}, rust ${{ inputs.msrv }})
+    name: os ${{ matrix.os }}, rust ${{ inputs.msrv }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     if: inputs.msrv != ''
@@ -96,7 +96,7 @@ jobs:
       run: cargo nextest run --all-features --manifest-path ${{ inputs.manifest-path }}
 
   test-nightly:
-    name: test (os ${{ matrix.os }}, rust nightly)
+    name: os ${{ matrix.os }}, rust nightly
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     strategy:

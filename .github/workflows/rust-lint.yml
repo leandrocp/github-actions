@@ -20,7 +20,7 @@ env:
 
 jobs:
   lint:
-    name: lint (rust ${{ matrix.rust }})
+    name: rust ${{ matrix.rust }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
