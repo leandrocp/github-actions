@@ -15,6 +15,10 @@ on:
         type: string
         default: '["2.15"]'
         description: "NIF versions to build for"
+      feature-variants:
+        type: string
+        default: '[{"features":"","variant":""}]'
+        description: "Feature variants to build, as JSON objects with features and variant keys"
       working-directory:
         type: string
         default: "."
@@ -22,7 +26,7 @@ on:
 
 jobs:
   build:
-    name: ${{ matrix.job.os }} ${{ matrix.job.target }}, ${{ matrix.nif }}, ${{ matrix.job.variant || 'default' }}
+    name: ${{ matrix.job.os }} ${{ matrix.job.target }}, ${{ matrix.nif }}, ${{ matrix.variant.variant || 'default' }}, ${{ matrix.job.variant || 'default' }}
     runs-on: ${{ matrix.job.os }}
     timeout-minutes: 60
 
@@ -35,6 +39,7 @@ jobs:
       fail-fast: false
       matrix:
         nif: ${{ fromJSON(inputs.nif-versions) }}
+        variant: ${{ fromJSON(inputs.feature-variants) }}
         job:
           - { target: aarch64-apple-darwin,         os: macos-14 }
           - { target: aarch64-unknown-linux-gnu,    os: ubuntu-22.04, use-cross: true }
@@ -71,6 +76,28 @@ jobs:
           echo "RUSTFLAGS=${{ matrix.job.rustflags }}" >> "$GITHUB_ENV"
         if: ${{ matrix.job.rustflags }}
 
+      - name: Configure feature variant
+        shell: bash
+        run: |
+          cargo_args=""
+          if [ "${{ matrix.variant.variant }}" != "" ]; then
+            nif="${{ matrix.nif }}"
+            cargo_args="--no-default-features --features nif_version_${nif//./_}"
+            if [ "${{ matrix.variant.features }}" != "" ]; then
+              cargo_args="$cargo_args,${{ matrix.variant.features }}"
+            fi
+          fi
+
+          variant="${{ matrix.job.variant }}"
+          if [ "$variant" != "" ] && [ "${{ matrix.variant.variant }}" != "" ]; then
+            variant="${variant}_${{ matrix.variant.variant }}"
+          elif [ "${{ matrix.variant.variant }}" != "" ]; then
+            variant="${{ matrix.variant.variant }}"
+          fi
+
+          echo "CARGO_ARGS=$cargo_args" >> "$GITHUB_ENV"
+          echo "FINAL_VARIANT=$variant" >> "$GITHUB_ENV"
+
       - name: Add target
         shell: bash
         run: |
@@ -79,7 +106,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           prefix-key: v0-precomp
-          shared-key: ${{ matrix.job.target }}-${{ matrix.nif }}-${{ matrix.job.os }}
+          shared-key: ${{ matrix.job.target }}-${{ matrix.nif }}-${{ matrix.job.os }}-${{ matrix.variant.variant || 'default' }}
           workspaces: |
             ${{ inputs.project-dir }}
 
@@ -94,7 +121,8 @@ jobs:
           use-cross: ${{ matrix.job.use-cross }}
           cross-version: 'from-source'
           project-dir: ${{ inputs.project-dir }}
-          variant: ${{ matrix.job.variant }}
+          variant: ${{ env.FINAL_VARIANT }}
+          cargo-args: ${{ env.CARGO_ARGS }}
 
       - name: Artifact attestation
         if: startsWith(github.ref, 'refs/tags/')

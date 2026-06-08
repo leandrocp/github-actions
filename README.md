@@ -204,6 +204,18 @@ jobs:
       nif-versions: '["2.15", "2.16"]'
 ```
 
+Customize feature variants:
+
+```yaml
+jobs:
+  release:
+    uses: leandrocp/github-actions/.github/workflows/nif-release.yml@main
+    with:
+      project-name: my_nif
+      project-dir: native/my_nif
+      feature-variants: '[{"features":"","variant":""},{"features":"syntect","variant":"syntect"},{"features":"","variant":"no_syntax_highlighter"}]'
+```
+
 ## Usage: Hex Publish
 
 Keep the trigger in the consumer repo and call the reusable workflow from here:
