@@ -6,6 +6,7 @@ Initially based on [mtrudel/elixir-ci-actions](https://github.com/mtrudel/elixir
 
 Used by:
 - https://github.com/leandrocp/mdex
+- https://github.com/leandrocp/mdex_native
 - https://github.com/leandrocp/mdex_gfm
 - https://github.com/leandrocp/mdex_mermaid
 - https://github.com/leandrocp/mdex_katex
