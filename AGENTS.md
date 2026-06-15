@@ -39,10 +39,13 @@ The repository also includes **validate.yml**, a repository-level workflow that 
 
 3. **Custom Environment Variables**: Elixir workflows support additional environment variables
    - Accepts JSON object via `env_vars` input
-   - Example: `env_vars: '{"MDEX_BUILD": "1"}'`
-   - Useful for projects requiring special compilation flags (e.g., forcing NIF builds)
+    - Example: `env_vars: '{"MDEX_BUILD": "1"}'`
+    - Useful for projects requiring special compilation flags (e.g., forcing NIF builds)
 
-4. **Publishing Workflows**
+4. **Coverage**: `elixir-test.yml` supports `coverage: true` to run `mix test --cover`
+   - Coverage thresholds stay in each project's `mix.exs` via `test_coverage`
+
+5. **Publishing Workflows**
    - `hex-publish.yml` requires the `HEX_API_KEY` secret
    - `hex-publish.yml` uses `env-vars` (hyphenated) rather than `env_vars`
    - `hex-publish.yml` can install Rust and run a `pre-publish-command` before `publish-command`

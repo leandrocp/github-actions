@@ -61,6 +61,18 @@ jobs:
       env_vars: '{"MDEX_BUILD": "1", "CUSTOM_VAR": "value"}'
 ```
 
+Run tests with coverage enabled:
+
+```yaml
+jobs:
+  test:
+    uses: leandrocp/github-actions/.github/workflows/elixir-test.yml@main
+    with:
+      coverage: true
+```
+
+Coverage thresholds are configured by the project through `test_coverage` in `mix.exs`.
+
 Enable optional Credo checks and pass extra arguments when needed:
 
 ```yaml

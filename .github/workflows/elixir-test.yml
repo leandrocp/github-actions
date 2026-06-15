@@ -18,6 +18,10 @@ on:
         type: string
         default: ""
         description: "Optional Rust toolchain to install for jobs that compile Rust or NIF code"
+      coverage:
+        type: boolean
+        default: false
+        description: "Run tests with coverage enabled"
 
 env:
   MIX_ENV: test
@@ -76,4 +80,9 @@ jobs:
         mix deps.compile
 
     - name: Run tests
+      if: ${{ !inputs.coverage }}
       run: mix test
+
+    - name: Run tests with coverage
+      if: ${{ inputs.coverage }}
+      run: mix test --cover
