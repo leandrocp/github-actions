@@ -23,6 +23,19 @@ on:
         type: string
         default: "."
         description: "Directory containing mix.exs (e.g., 'packages/elixir/my_app')"
+      r2-path:
+        type: string
+        default: ""
+        description: "R2 object key path where artifacts will be uploaded"
+    secrets:
+      R2_ACCOUNT_ID:
+        required: false
+      R2_ACCESS_KEY_ID:
+        required: false
+      R2_SECRET_ACCESS_KEY:
+        required: false
+      R2_BUCKET:
+        required: false
 
 jobs:
   build:
@@ -156,3 +169,23 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           files: artifacts/*
+
+      - name: Upload NIF artifacts to Cloudflare R2
+        if: inputs.r2-path != ''
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          R2_PATH: ${{ inputs.r2-path }}
+        run: |
+          if [ -z "$R2_ACCOUNT_ID" ] || [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ] || [ -z "$R2_BUCKET" ]; then
+            echo "R2 upload is enabled, but one or more R2 secrets are missing" >&2
+            exit 1
+          fi
+
+          path="${R2_PATH%/}"
+          aws s3 sync artifacts "s3://${R2_BUCKET}/${path}" \
+            --endpoint-url "https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com" \
+            --cache-control "public, max-age=31536000, immutable"

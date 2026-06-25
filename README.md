@@ -229,6 +229,25 @@ jobs:
       feature-variants: '[{"features":"","variant":""},{"features":"syntect","variant":"syntect"},{"features":"","variant":"no_syntax_highlighter"}]'
 ```
 
+Upload artifacts to Cloudflare R2:
+
+```yaml
+jobs:
+  release:
+    uses: leandrocp/github-actions/.github/workflows/nif-release.yml@main
+    with:
+      project-name: my_nif
+      project-dir: native/my_nif
+      r2-path: releases/download/${{ github.ref_name }}
+    secrets:
+      R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_BUCKET: ${{ secrets.R2_BUCKET }}
+```
+
+Disabled by default, artifacts are uploaded under `r2-path`.
+
 ## Usage: Hex Publish
 
 Keep the trigger in the consumer repo and call the reusable workflow from here:
