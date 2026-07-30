@@ -19,6 +19,10 @@ on:
         type: string
         default: ""
         description: "Additional arguments passed to cargo nextest run"
+      test-stage:
+        type: string
+        default: "all"
+        description: "Stage selected by rust-test-gated.yml: all, stable, or compatibility"
       msrv:
         type: string
         default: ""
@@ -32,6 +36,7 @@ jobs:
     name: os ${{ matrix.os }}, rust stable
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
+    if: inputs.test-stage != 'compatibility'
     strategy:
       fail-fast: false
       matrix:
@@ -67,7 +72,7 @@ jobs:
     name: os ${{ matrix.os }}, rust ${{ inputs.msrv }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
-    if: inputs.msrv != ''
+    if: inputs.test-stage != 'stable' && inputs.msrv != ''
     strategy:
       fail-fast: false
       matrix:
@@ -103,6 +108,7 @@ jobs:
     name: os ${{ matrix.os }}, rust nightly
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
+    if: inputs.test-stage != 'stable'
     strategy:
       fail-fast: false
       matrix:
