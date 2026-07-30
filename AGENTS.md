@@ -17,7 +17,6 @@ All workflows are reusable (`on: workflow_call`) and located in `.github/workflo
 - **elixir-test.yml**: Runs Elixir tests across multiple Elixir/OTP version combinations
 - **elixir-lint.yml**: Lints Elixir code and optionally runs Credo; can also install Rust for projects that compile Rust or NIF code
 - **rust-test.yml**: Runs Rust tests across stable/MSRV and nightly OS matrices
-- **rust-test-gated.yml**: Opt-in stable-first wrapper around `rust-test.yml`
 - **rust-lint.yml**: Lints Rust code (rustfmt, clippy) and optionally verifies MSRV
 - **nif-release.yml**: Builds precompiled Rustler NIF artifacts for multiple targets and publishes tagged releases
 - **hex-publish.yml**: Publishes Elixir packages to Hex with configurable Elixir/OTP, optional Rust setup, custom env vars, and pre-publish hooks
@@ -30,7 +29,7 @@ The repository also includes **validate.yml**, a repository-level workflow that 
    - Elixir test: defaults to Elixir 1.20/OTP 29 and `main-otp-29`/`maint-29`
    - Elixir lint: defaults to the same Elixir/OTP pairs and can optionally run Credo
    - Rust test: defaults to stable on LTS runners and nightly on latest runners; when `msrv` is set, an additional MSRV matrix runs on the stable OS set
-   - Rust gated test: waits for the stable matrix before starting MSRV and nightly; callers must opt in by using `rust-test-gated.yml`
+   - Rust test stages: `test-stage` defaults to `all`; callers can compose `stable` and `compatibility` calls with `needs` for an opt-in stable-first gate
    - NIF release: builds a target matrix across macOS, Linux, Windows, and FreeBSD targets
 
 2. **Customizable Inputs**: All workflows accept version arrays as JSON strings

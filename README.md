@@ -135,20 +135,29 @@ parallel when using `rust-test.yml`.
 
 ### Opt-in Stable Gate
 
-Use `rust-test-gated.yml` to run stable tests first, then start the MSRV and
-nightly matrices in parallel only after every stable job passes:
+Use the `test-stage` input to call `rust-test.yml` in two stages. Put `needs`
+on the compatibility call so its MSRV and nightly matrices start only after
+every stable job passes:
 
 ```yaml
 jobs:
-  test:
-    uses: leandrocp/github-actions/.github/workflows/rust-test-gated.yml@main
+  test-stable:
+    uses: leandrocp/github-actions/.github/workflows/rust-test.yml@main
     with:
+      test-stage: stable
+
+  test-compatibility:
+    needs: test-stable
+    uses: leandrocp/github-actions/.github/workflows/rust-test.yml@main
+    with:
+      test-stage: compatibility
       msrv: '1.82.0'
 ```
 
-This is opt-in. Existing callers of `rust-test.yml` keep the fully parallel
-behavior. If stable fails, the gated workflow skips up to six compatibility
-jobs; successful runs may take longer because compatibility waits for the
+`test-stage` accepts `all` (the default), `stable`, or `compatibility`.
+Existing callers keep the fully parallel behavior. If stable fails, GitHub
+skips the downstream reusable workflow call and its compatibility jobs.
+Successful gated runs may take longer because compatibility waits for the
 slowest stable runner.
 
 ### Customization Examples

@@ -22,7 +22,7 @@ on:
       test-stage:
         type: string
         default: "all"
-        description: "Stage selected by rust-test-gated.yml: all, stable, or compatibility"
+        description: "Jobs to run: all, stable, or compatibility (MSRV and nightly)"
       msrv:
         type: string
         default: ""
