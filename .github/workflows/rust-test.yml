@@ -15,6 +15,10 @@ on:
         type: string
         default: "Cargo.toml"
         description: "Path to Cargo.toml (e.g., 'native/my_nif/Cargo.toml')"
+      test-args:
+        type: string
+        default: ""
+        description: "Additional arguments passed to cargo nextest run"
       msrv:
         type: string
         default: ""
@@ -57,7 +61,7 @@ jobs:
         shared-key: stable-test
 
     - name: Run tests
-      run: cargo nextest run --all-features --manifest-path ${{ inputs.manifest-path }}
+      run: cargo nextest run --all-features --manifest-path ${{ inputs.manifest-path }} ${{ inputs.test-args }}
 
   test-msrv:
     name: os ${{ matrix.os }}, rust ${{ inputs.msrv }}
@@ -93,7 +97,7 @@ jobs:
         shared-key: msrv-test
 
     - name: Run tests
-      run: cargo nextest run --all-features --manifest-path ${{ inputs.manifest-path }}
+      run: cargo nextest run --all-features --manifest-path ${{ inputs.manifest-path }} ${{ inputs.test-args }}
 
   test-nightly:
     name: os ${{ matrix.os }}, rust nightly
@@ -128,4 +132,4 @@ jobs:
         shared-key: nightly-test
 
     - name: Run tests
-      run: cargo nextest run --all-features --manifest-path ${{ inputs.manifest-path }}
+      run: cargo nextest run --all-features --manifest-path ${{ inputs.manifest-path }} ${{ inputs.test-args }}

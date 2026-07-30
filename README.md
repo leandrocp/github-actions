@@ -166,6 +166,22 @@ jobs:
       manifest-path: 'native/my_nif/Cargo.toml'
 ```
 
+**Test selected packages from a workspace in one job matrix:**
+```yaml
+jobs:
+  test:
+    uses: leandrocp/github-actions/.github/workflows/rust-test.yml@main
+    with:
+      manifest-path: 'Cargo.toml'
+      test-args: >-
+        --package my_core
+        --package my_cli
+```
+
+`test-args` is appended to `cargo nextest run` for the stable, MSRV, and nightly
+jobs. Selecting multiple workspace packages this way avoids repeating the full
+OS and toolchain matrix for each package.
+
 **Test and verify Minimum Supported Rust Version (MSRV):**
 ```yaml
 jobs:
