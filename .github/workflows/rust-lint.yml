@@ -43,7 +43,7 @@ jobs:
         shared-key: ${{ matrix.rust }}-lint
 
     - name: Install just
-      uses: taiki-e/install-action@v2
+      uses: taiki-e/install-action@v2.85.5
       with:
         tool: just
 
@@ -68,7 +68,7 @@ jobs:
         toolchain: ${{ inputs.msrv }}
 
     - name: Install just
-      uses: taiki-e/install-action@v2
+      uses: taiki-e/install-action@v2.85.5
       with:
         tool: just
 

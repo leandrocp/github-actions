@@ -51,12 +51,12 @@ jobs:
         toolchain: stable
 
     - name: Install cargo-nextest
-      uses: taiki-e/install-action@v2
+      uses: taiki-e/install-action@v2.85.5
       with:
         tool: cargo-nextest
 
     - name: Install just
-      uses: taiki-e/install-action@v2
+      uses: taiki-e/install-action@v2.85.5
       with:
         tool: just
 
@@ -87,12 +87,12 @@ jobs:
         toolchain: ${{ inputs.msrv }}
 
     - name: Install cargo-nextest
-      uses: taiki-e/install-action@v2
+      uses: taiki-e/install-action@v2.85.5
       with:
         tool: cargo-nextest
 
     - name: Install just
-      uses: taiki-e/install-action@v2
+      uses: taiki-e/install-action@v2.85.5
       with:
         tool: just
 
@@ -123,12 +123,12 @@ jobs:
         toolchain: nightly
 
     - name: Install cargo-nextest
-      uses: taiki-e/install-action@v2
+      uses: taiki-e/install-action@v2.85.5
       with:
         tool: cargo-nextest
 
     - name: Install just
-      uses: taiki-e/install-action@v2
+      uses: taiki-e/install-action@v2.85.5
       with:
         tool: just
 
