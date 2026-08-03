@@ -1,0 +1,52 @@
+name: Elixir Release
+
+on:
+  workflow_call:
+    inputs:
+      working-directory:
+        type: string
+        default: "."
+        description: "Directory containing the Elixir package"
+      version-file:
+        type: string
+        default: "mix.exs"
+        description: "File containing the package @version declaration"
+      changelog-file:
+        type: string
+        default: "CHANGELOG.md"
+        description: "Changelog updated by the release pull request"
+      release-branch:
+        type: string
+        default: "release/elixir"
+        description: "Persistent branch used for the release pull request"
+    secrets:
+      release_token:
+        required: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: elixir-release-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Prepare or publish release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.release_token }}
+
+      - name: Prepare or publish Elixir release
+        uses: leandrocp/github-actions/elixir-release@main
+        with:
+          token: ${{ secrets.release_token }}
+          working-directory: ${{ inputs.working-directory }}
+          version-file: ${{ inputs.version-file }}
+          changelog-file: ${{ inputs.changelog-file }}
+          release-branch: ${{ inputs.release-branch }}

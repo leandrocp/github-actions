@@ -4,10 +4,12 @@ on:
   pull_request:
     paths:
       - '.github/workflows/**'
+      - 'elixir-release/**'
   push:
     branches: [main]
     paths:
       - '.github/workflows/**'
+      - 'elixir-release/**'
   workflow_dispatch:
 
 jobs:
@@ -21,3 +23,6 @@ jobs:
         uses: raven-actions/actionlint@v2
         with:
           fail-on-error: true
+
+      - name: Test Elixir release changelog helper
+        run: python3 -m unittest discover -s elixir-release -p 'test_*.py' -v

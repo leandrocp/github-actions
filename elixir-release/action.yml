@@ -1,0 +1,240 @@
+name: Elixir Release
+description: Maintain an Elixir release pull request and publish it after merge
+
+inputs:
+  token:
+    description: Token used to push the release branch, open the pull request, and create the release
+    required: true
+  working-directory:
+    description: Directory containing the Elixir package
+    default: "."
+  version-file:
+    description: File containing the package @version declaration
+    default: "mix.exs"
+  changelog-file:
+    description: Changelog updated by the release pull request
+    default: "CHANGELOG.md"
+  release-branch:
+    description: Persistent branch used for the release pull request
+    default: "release/elixir"
+
+outputs:
+  mode:
+    description: Whether the run prepared or published a release
+    value: ${{ steps.state.outputs.mode }}
+  version:
+    description: Version prepared or published by this run
+    value: ${{ steps.result.outputs.version }}
+  pull-request-number:
+    description: Release pull request number, when one was created or updated
+    value: ${{ steps.pull-request.outputs.pull-request-number }}
+  pull-request-url:
+    description: Release pull request URL, when one was created or updated
+    value: ${{ steps.pull-request.outputs.pull-request-url }}
+
+runs:
+  using: composite
+  steps:
+    - name: Inspect release state
+      id: state
+      shell: bash
+      env:
+        WORKING_DIRECTORY: ${{ inputs.working-directory }}
+        VERSION_FILE: ${{ inputs.version-file }}
+      run: |
+        set -euo pipefail
+
+        package_dir="$GITHUB_WORKSPACE/$WORKING_DIRECTORY"
+        version_path="$package_dir/$VERSION_FILE"
+
+        if [[ ! -f "$version_path" ]]; then
+          echo "Version file does not exist: $version_path" >&2
+          exit 1
+        fi
+
+        current_version=$(sed -nE 's/^[[:space:]]*@version[[:space:]]+"([^"]+)".*/\1/p' "$version_path")
+        if [[ -z "$current_version" || $(printf '%s\n' "$current_version" | wc -l | tr -d ' ') != 1 ]]; then
+          echo "Expected exactly one @version declaration in $version_path" >&2
+          exit 1
+        fi
+
+        latest_tag=$(git tag --merged HEAD --list 'v[0-9]*' --sort=-v:refname | head -n 1)
+        if [[ -z "$latest_tag" ]]; then
+          echo "No reachable v-prefixed release tag was found" >&2
+          exit 1
+        fi
+        latest_version=${latest_tag#v}
+
+        comparison=$(python3 "$GITHUB_ACTION_PATH/release_changelog.py" compare "$current_version" "$latest_version")
+        case "$comparison" in
+          equal) mode=prepare ;;
+          greater) mode=publish ;;
+          less)
+            echo "mix version $current_version is behind latest tag $latest_tag" >&2
+            exit 1
+            ;;
+        esac
+
+        echo "mode=$mode" >> "$GITHUB_OUTPUT"
+        echo "current-version=$current_version" >> "$GITHUB_OUTPUT"
+        echo "latest-tag=$latest_tag" >> "$GITHUB_OUTPUT"
+
+    - name: Calculate next version with git-cliff
+      if: steps.state.outputs.mode == 'prepare'
+      id: bump
+      uses: orhun/git-cliff-action@f50e11560dce63f7c33227798f90b924471a88b5 # v4.8.0
+      with:
+        version: v2.13.1
+        config: ${{ github.action_path }}/cliff.toml
+        args: >-
+          --unreleased
+          --bumped-version
+          --github-repo=${{ github.repository }}
+          --output=${{ runner.temp }}/elixir-release-next-version
+        github_token: ${{ inputs.token }}
+
+    - name: Check whether a release is needed
+      if: steps.state.outputs.mode == 'prepare'
+      id: next
+      shell: bash
+      env:
+        CURRENT_VERSION: ${{ steps.state.outputs.current-version }}
+        NEXT_VERSION_FILE: ${{ steps.bump.outputs.changelog }}
+      run: |
+        set -euo pipefail
+
+        next_version=$(tr -d '\r\n[:space:]' < "$NEXT_VERSION_FILE")
+        next_version=${next_version#v}
+
+        if [[ -z "$next_version" ]]; then
+          echo "git-cliff did not calculate a version" >&2
+          exit 1
+        fi
+
+        comparison=$(python3 "$GITHUB_ACTION_PATH/release_changelog.py" compare "$next_version" "$CURRENT_VERSION")
+        case "$comparison" in
+          equal) has_release=false ;;
+          greater) has_release=true ;;
+          less)
+            echo "Calculated version $next_version is behind current version $CURRENT_VERSION" >&2
+            exit 1
+            ;;
+        esac
+
+        echo "has-release=$has_release" >> "$GITHUB_OUTPUT"
+        echo "version=$next_version" >> "$GITHUB_OUTPUT"
+
+    - name: Render release notes with git-cliff
+      if: steps.state.outputs.mode == 'prepare' && steps.next.outputs.has-release == 'true'
+      id: render
+      uses: orhun/git-cliff-action@f50e11560dce63f7c33227798f90b924471a88b5 # v4.8.0
+      with:
+        version: v2.13.1
+        config: ${{ github.action_path }}/cliff.toml
+        args: >-
+          --unreleased
+          --tag=v${{ steps.next.outputs.version }}
+          --github-repo=${{ github.repository }}
+          --output=${{ runner.temp }}/elixir-release-notes.md
+        github_token: ${{ inputs.token }}
+
+    - name: Update version and changelog
+      if: steps.state.outputs.mode == 'prepare' && steps.next.outputs.has-release == 'true'
+      shell: bash
+      env:
+        WORKING_DIRECTORY: ${{ inputs.working-directory }}
+        VERSION_FILE: ${{ inputs.version-file }}
+        CHANGELOG_FILE: ${{ inputs.changelog-file }}
+        NEXT_VERSION: ${{ steps.next.outputs.version }}
+        NOTES_FILE: ${{ steps.render.outputs.changelog }}
+      run: |
+        set -euo pipefail
+        python3 "$GITHUB_ACTION_PATH/release_changelog.py" prepare \
+          --version-file "$GITHUB_WORKSPACE/$WORKING_DIRECTORY/$VERSION_FILE" \
+          --changelog-file "$GITHUB_WORKSPACE/$WORKING_DIRECTORY/$CHANGELOG_FILE" \
+          --notes-file "$NOTES_FILE" \
+          --version "$NEXT_VERSION"
+
+    - name: Create or update release pull request
+      if: steps.state.outputs.mode == 'prepare' && steps.next.outputs.has-release == 'true'
+      id: pull-request
+      uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+      with:
+        token: ${{ inputs.token }}
+        branch: ${{ inputs.release-branch }}
+        delete-branch: true
+        add-paths: |
+          ${{ inputs.working-directory }}/${{ inputs.version-file }}
+          ${{ inputs.working-directory }}/${{ inputs.changelog-file }}
+        commit-message: "chore: release v${{ steps.next.outputs.version }}"
+        title: "chore: release v${{ steps.next.outputs.version }}"
+        body: |
+          Automated Elixir release pull request.
+
+          - Bumps the package version to `${{ steps.next.outputs.version }}`.
+          - Updates `${{ inputs.changelog-file }}` with categorized, contributor-attributed release notes generated by git-cliff.
+          - Merging this pull request creates tag `v${{ steps.next.outputs.version }}` and its GitHub Release.
+        committer: "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
+        author: "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
+        draft: false
+
+    - name: Extract merged release notes
+      if: steps.state.outputs.mode == 'publish'
+      id: notes
+      shell: bash
+      env:
+        WORKING_DIRECTORY: ${{ inputs.working-directory }}
+        CHANGELOG_FILE: ${{ inputs.changelog-file }}
+        CURRENT_VERSION: ${{ steps.state.outputs.current-version }}
+      run: |
+        set -euo pipefail
+        notes_path="$RUNNER_TEMP/elixir-release-publish-notes.md"
+        python3 "$GITHUB_ACTION_PATH/release_changelog.py" extract \
+          --changelog-file "$GITHUB_WORKSPACE/$WORKING_DIRECTORY/$CHANGELOG_FILE" \
+          --version "$CURRENT_VERSION" \
+          --output "$notes_path"
+        echo "path=$notes_path" >> "$GITHUB_OUTPUT"
+
+    - name: Create tag and GitHub Release
+      if: steps.state.outputs.mode == 'publish'
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        CURRENT_VERSION: ${{ steps.state.outputs.current-version }}
+        NOTES_FILE: ${{ steps.notes.outputs.path }}
+      run: |
+        set -euo pipefail
+        tag="v$CURRENT_VERSION"
+
+        if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+          echo "GitHub Release $tag already exists"
+          exit 0
+        fi
+
+        if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null 2>&1; then
+          gh release create "$tag" \
+            --repo "$GITHUB_REPOSITORY" \
+            --verify-tag \
+            --title "$tag" \
+            --notes-file "$NOTES_FILE"
+        else
+          gh release create "$tag" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "$tag" \
+            --notes-file "$NOTES_FILE"
+        fi
+
+    - name: Report result
+      id: result
+      shell: bash
+      env:
+        MODE: ${{ steps.state.outputs.mode }}
+        CURRENT_VERSION: ${{ steps.state.outputs.current-version }}
+        NEXT_VERSION: ${{ steps.next.outputs.version }}
+      run: |
+        if [[ "$MODE" == "publish" ]]; then
+          echo "version=$CURRENT_VERSION" >> "$GITHUB_OUTPUT"
+        else
+          echo "version=$NEXT_VERSION" >> "$GITHUB_OUTPUT"
+        fi

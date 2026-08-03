@@ -16,12 +16,16 @@ All workflows are reusable (`on: workflow_call`) and located in `.github/workflo
 
 - **elixir-test.yml**: Runs Elixir tests across multiple Elixir/OTP version combinations
 - **elixir-lint.yml**: Lints Elixir code and optionally runs Credo; can also install Rust for projects that compile Rust or NIF code
+- **elixir-release.yml**: Maintains git-cliff release pull requests and creates tags/releases after merge
 - **rust-test.yml**: Runs Rust tests across stable/MSRV and nightly OS matrices
 - **rust-lint.yml**: Lints Rust code (rustfmt, clippy) and optionally verifies MSRV
 - **nif-release.yml**: Builds precompiled Rustler NIF artifacts for multiple targets and publishes tagged releases
 - **hex-publish.yml**: Publishes Elixir packages to Hex with configurable Elixir/OTP, optional Rust setup, custom env vars, and pre-publish hooks
 
 The repository also includes **validate.yml**, a repository-level workflow that runs `actionlint` for changes under `.github/workflows/`. It is not reusable.
+
+The `elixir-release/` directory contains the composite action, git-cliff
+configuration, and changelog helper used by `elixir-release.yml`.
 
 ### Key Design Patterns
 
@@ -47,6 +51,8 @@ The repository also includes **validate.yml**, a repository-level workflow that 
    - Coverage thresholds stay in each project's `mix.exs` via `test_coverage`
 
 5. **Publishing Workflows**
+   - `elixir-release.yml` requires an existing `vX.Y.Z` tag and a token that can create pull requests, tags, and releases
+   - `elixir-release.yml` expects one `@version "x.y.z"` declaration and preserves existing changelog history
    - `hex-publish.yml` requires the `HEX_API_KEY` secret
    - `hex-publish.yml` uses `env-vars` (hyphenated) rather than `env_vars`
    - `hex-publish.yml` can install Rust and run a `pre-publish-command` before `publish-command`

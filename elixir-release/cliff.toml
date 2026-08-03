@@ -1,0 +1,61 @@
+# git-cliff configuration for Elixir release pull requests.
+
+[changelog]
+body = """
+{% macro remote_url() -%}
+https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}
+{%- endmacro %}
+
+## [{{ version | trim_start_matches(pat="v") }}]({{ self::remote_url() }}/compare/{{ previous.version }}...{{ version }}) ({{ timestamp | date(format="%Y-%m-%d") }})
+{% for group, commits in commits | group_by(attribute="group") %}
+### {{ group | split(pat="|") | last }}
+{% for commit in commits %}
+- {% if commit.scope %}**{{ commit.scope }}:** {% endif %}{% if commit.breaking %}**Breaking:** {% endif %}{% if commit.remote.pr_title %}{{ commit.remote.pr_title | replace_regex(from="^(feat(ure)?|fix|perf|refactor|docs?|revert|security)(\\([^)]*\\))?!?:\\s*", to="") | upper_first }}{% else %}{{ commit.message | upper_first }}{% endif %}{% if commit.remote.username %} by @{{ commit.remote.username }}{% endif %}{% if commit.remote.pr_number %} in [#{{ commit.remote.pr_number }}]({{ self::remote_url() }}/pull/{{ commit.remote.pr_number }}){% endif %}
+{%- endfor %}
+{% endfor %}
+{% if previous.version %}
+**Full Changelog**: {{ self::remote_url() }}/compare/{{ previous.version }}...{{ version }}
+{% endif %}
+"""
+trim = true
+
+[git]
+conventional_commits = true
+filter_unconventional = false
+split_commits = false
+commit_preprocessors = [
+  { pattern = " \\(#[0-9]+\\)$", replace = "" },
+]
+commit_parsers = [
+  { field = "remote.username", pattern = "^dependabot\\[bot\\]$", skip = true },
+  { field = "remote.pr_title", pattern = "(?i)^(bump|update|remove|unlock).*\\bdeps?\\b", skip = true },
+  { field = "remote.pr_title", pattern = "^(chore|build)\\(deps.*\\)", skip = true },
+  { field = "remote.pr_title", pattern = "^chore(\\([^)]*\\))?: (prepare )?release", skip = true },
+  { field = "remote.pr_title", pattern = "^feat(ure)?(\\([^)]*\\))?!?:", group = "0|Features" },
+  { field = "remote.pr_title", pattern = "^fix(\\([^)]*\\))?!?:", group = "1|Bug Fixes" },
+  { field = "remote.pr_title", pattern = "^perf(\\([^)]*\\))?!?:", group = "2|Performance Improvements" },
+  { field = "remote.pr_title", pattern = "^refactor(\\([^)]*\\))?!?:", group = "3|Code Refactoring" },
+  { field = "remote.pr_title", pattern = "^docs?(\\([^)]*\\))?!?:", group = "4|Documentation" },
+  { field = "remote.pr_title", pattern = "^revert(\\([^)]*\\))?!?:", group = "5|Reverts" },
+  { field = "remote.pr_title", pattern = "^security(\\([^)]*\\))?!?:", group = "6|Security" },
+  { message = "(?i)^(bump|update|remove|unlock).*\\bdeps?\\b", skip = true },
+  { message = "^(chore|build)\\(deps.*\\)", skip = true },
+  { message = "^chore(\\([^)]*\\))?: (prepare )?release", skip = true },
+  { message = "^feat(ure)?(\\([^)]*\\))?!?:", group = "0|Features" },
+  { message = "^fix(\\([^)]*\\))?!?:", group = "1|Bug Fixes" },
+  { message = "^perf(\\([^)]*\\))?!?:", group = "2|Performance Improvements" },
+  { message = "^refactor(\\([^)]*\\))?!?:", group = "3|Code Refactoring" },
+  { message = "^docs?(\\([^)]*\\))?!?:", group = "4|Documentation" },
+  { message = "^revert(\\([^)]*\\))?!?:", group = "5|Reverts" },
+  { message = "^security(\\([^)]*\\))?!?:", group = "6|Security" },
+  { message = "^(style|test|build|ci|chore)", skip = true },
+  { message = ".*", group = "9|Other Changes" },
+]
+protect_breaking_commits = false
+filter_commits = true
+tag_pattern = "v[0-9]+\\.[0-9]+\\.[0-9]+"
+sort_commits = "oldest"
+
+[bump]
+features_always_bump_minor = true
+breaking_always_bump_major = false

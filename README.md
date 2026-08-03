@@ -95,6 +95,58 @@ jobs:
       env_vars: '{"MIX_ENV": "test", "MDEX_BUILD": "1"}'
 ```
 
+### Release pull requests
+
+`elixir-release.yml` uses [git-cliff](https://git-cliff.org/) to maintain a
+categorized release pull request. Release notes credit the pull request author,
+omit dependency and housekeeping commits, and do not add a first-contribution
+section. Merging the release pull request tags its merge commit and creates the
+GitHub Release.
+
+The caller keeps the trigger because reusable workflows cannot define when a
+repository should release:
+
+```yaml
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release:
+    uses: leandrocp/github-actions/.github/workflows/elixir-release.yml@main
+    secrets:
+      release_token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+```
+
+The existing token can be reused; no GitHub App or additional token is needed.
+It must be able to push branches and tags, create pull requests, and create
+releases. A personal access token is required instead of `GITHUB_TOKEN` when
+the created tag must trigger another workflow, such as Hex or NIF publishing.
+
+Defaults assume `mix.exs` contains one `@version "x.y.z"` declaration,
+`CHANGELOG.md` starts with `# Changelog`, release tags use `vX.Y.Z`, and at least
+one release tag already exists. Override paths for an umbrella or nested package:
+
+```yaml
+jobs:
+  release:
+    uses: leandrocp/github-actions/.github/workflows/elixir-release.yml@main
+    with:
+      working-directory: packages/my_package
+      version-file: mix.exs
+      changelog-file: CHANGELOG.md
+      release-branch: release/my-package
+    secrets:
+      release_token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+```
+
 ## Usage: Rust
 
 Basic usage with default settings:
