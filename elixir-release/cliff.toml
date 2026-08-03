@@ -14,9 +14,6 @@ https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}
 - {% if commit.scope %}**{{ commit.scope }}:** {% endif %}{% if commit.breaking %}**Breaking:** {% endif %}{% if commit.remote.pr_title %}{{ commit.remote.pr_title | replace_regex(from="^(feat(ure)?|fix|perf|refactor|docs?|revert|security)(\\([^)]*\\))?!?:\\s*", to="") | upper_first }}{% else %}{{ commit.message | upper_first }}{% endif %}{% if commit.remote.username %} by @{{ commit.remote.username }}{% endif %}{% if commit.remote.pr_number %} in [#{{ commit.remote.pr_number }}]({{ self::remote_url() }}/pull/{{ commit.remote.pr_number }}){% endif %}
 {%- endfor %}
 {% endfor %}
-{% if previous.version %}
-**Full Changelog**: {{ self::remote_url() }}/compare/{{ previous.version }}...{{ version }}
-{% endif %}
 {% endif %}
 """
 trim = true
