@@ -1,0 +1,6 @@
+[changelog]
+body = ""
+
+[git]
+conventional_commits = false
+filter_commits = false

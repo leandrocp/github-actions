@@ -6,6 +6,7 @@ body = """
 https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}
 {%- endmacro %}
 
+{% if version %}
 ## [{{ version | trim_start_matches(pat="v") }}]({{ self::remote_url() }}/compare/{{ previous.version }}...{{ version }}) ({{ timestamp | date(format="%Y-%m-%d") }})
 {% for group, commits in commits | group_by(attribute="group") %}
 ### {{ group | split(pat="|") | last }}
@@ -15,6 +16,7 @@ https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}
 {% endfor %}
 {% if previous.version %}
 **Full Changelog**: {{ self::remote_url() }}/compare/{{ previous.version }}...{{ version }}
+{% endif %}
 {% endif %}
 """
 trim = true

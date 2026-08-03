@@ -79,18 +79,17 @@ runs:
         echo "current-version=$current_version" >> "$GITHUB_OUTPUT"
         echo "latest-tag=$latest_tag" >> "$GITHUB_OUTPUT"
 
-    - name: Calculate next version with git-cliff
+    - name: Install git-cliff
       if: steps.state.outputs.mode == 'prepare'
-      id: bump
       uses: orhun/git-cliff-action@f50e11560dce63f7c33227798f90b924471a88b5 # v4.8.0
       with:
         version: v2.13.1
-        config: ${{ github.action_path }}/cliff.toml
+        config: ${{ github.action_path }}/install.toml
         args: >-
           --unreleased
-          --bumped-version
-          --github-repo=${{ github.repository }}
-          --output=${{ runner.temp }}/elixir-release-next-version
+          --strip=all
+          --offline
+          --output=${{ runner.temp }}/elixir-release-install-check
         github_token: ${{ inputs.token }}
 
     - name: Check whether a release is needed
@@ -99,11 +98,19 @@ runs:
       shell: bash
       env:
         CURRENT_VERSION: ${{ steps.state.outputs.current-version }}
-        NEXT_VERSION_FILE: ${{ steps.bump.outputs.changelog }}
+        GITHUB_TOKEN: ${{ inputs.token }}
       run: |
         set -euo pipefail
 
-        next_version=$(tr -d '\r\n[:space:]' < "$NEXT_VERSION_FILE")
+        next_version_file="$RUNNER_TEMP/elixir-release-next-version"
+        "$RUNNER_TEMP/git-cliff/bin/git-cliff" \
+          --config "$GITHUB_ACTION_PATH/cliff.toml" \
+          --unreleased \
+          --bumped-version \
+          --github-repo "$GITHUB_REPOSITORY" \
+          --output "$next_version_file"
+
+        next_version=$(tr -d '\r\n[:space:]' < "$next_version_file")
         next_version=${next_version#v}
 
         if [[ -z "$next_version" ]]; then
@@ -127,16 +134,20 @@ runs:
     - name: Render release notes with git-cliff
       if: steps.state.outputs.mode == 'prepare' && steps.next.outputs.has-release == 'true'
       id: render
-      uses: orhun/git-cliff-action@f50e11560dce63f7c33227798f90b924471a88b5 # v4.8.0
-      with:
-        version: v2.13.1
-        config: ${{ github.action_path }}/cliff.toml
-        args: >-
-          --unreleased
-          --tag=v${{ steps.next.outputs.version }}
-          --github-repo=${{ github.repository }}
-          --output=${{ runner.temp }}/elixir-release-notes.md
-        github_token: ${{ inputs.token }}
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.token }}
+        NEXT_VERSION: ${{ steps.next.outputs.version }}
+      run: |
+        set -euo pipefail
+        notes_path="$RUNNER_TEMP/elixir-release-notes.md"
+        "$RUNNER_TEMP/git-cliff/bin/git-cliff" \
+          --config "$GITHUB_ACTION_PATH/cliff.toml" \
+          --unreleased \
+          --tag "v$NEXT_VERSION" \
+          --github-repo "$GITHUB_REPOSITORY" \
+          --output "$notes_path"
+        echo "changelog=$notes_path" >> "$GITHUB_OUTPUT"
 
     - name: Update version and changelog
       if: steps.state.outputs.mode == 'prepare' && steps.next.outputs.has-release == 'true'
