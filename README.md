@@ -103,6 +103,10 @@ omit dependency and housekeeping commits, and do not add a first-contribution
 section. Merging the release pull request tags its merge commit and creates the
 GitHub Release.
 
+For `0.x` packages, features bump the patch version and breaking changes bump
+the minor version. At `1.0.0` and later, features bump minor and breaking
+changes bump major.
+
 The caller keeps the trigger because reusable workflows cannot define when a
 repository should release:
 
