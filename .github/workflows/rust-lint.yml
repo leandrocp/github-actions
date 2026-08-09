@@ -42,11 +42,6 @@ jobs:
       with:
         shared-key: ${{ matrix.rust }}-lint
 
-    - name: Install just
-      uses: taiki-e/install-action@v2.85.5
-      with:
-        tool: just
-
     - name: Run clippy
       run: cargo clippy --all-targets --all-features --manifest-path ${{ inputs.manifest-path }} -- -D warnings
 
@@ -66,11 +61,6 @@ jobs:
       uses: dtolnay/rust-toolchain@master
       with:
         toolchain: ${{ inputs.msrv }}
-
-    - name: Install just
-      uses: taiki-e/install-action@v2.85.5
-      with:
-        tool: just
 
     - name: Verify MSRV
       run: cargo check --manifest-path ${{ inputs.manifest-path }}
