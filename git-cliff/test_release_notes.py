@@ -80,11 +80,29 @@ class ReleaseNotesTest(unittest.TestCase):
         notes = self.render(context)
         self.assertIn("## [0.1.1](https://github.com/leandrocp/example/compare/v0.1.0...v0.1.1)", notes)
         self.assertLess(notes.index("### Features"), notes.index("### Bug Fixes"))
-        self.assertIn("- New capability by @leandrocp", notes)
+        self.assertIn("- New capability", notes)
+        self.assertNotIn("by @leandrocp", notes)
         self.assertIn(r"- **api:** Clearer fix title by @contributor in [\#42](https://github.com/leandrocp/example/pull/42)", notes)
         self.assertNotIn("merge-maintainer", notes)
         self.assertNotIn("original fix", notes)
         self.assertNotIn("\n\n\n", notes)
+
+        feature = next(commit for commit in release["commits"] if commit["group"] == "Features")
+        for pr_author, username, credit in [
+            ("leandrocp", "merge-maintainer", ""),
+            ("contributor", "leandrocp", " by @contributor"),
+            (None, "contributor", " by @contributor"),
+            (None, "leandrocp", ""),
+        ]:
+            with self.subTest(pr_author=pr_author, username=username):
+                feature["remote"].update(pr_author=pr_author, username=username, pr_number=43)
+                notes = self.render(context)
+                self.assertIn(
+                    "- New capability" + credit + r" in [\#43](https://github.com/leandrocp/example/pull/43)",
+                    notes,
+                )
+                self.assertNotIn("by @leandrocp", notes)
+                self.assertNotIn("by @merge-maintainer", notes)
 
     def test_package_tags_first_release_and_breaking_commit(self):
         self.commit("feat(core)!: change API")

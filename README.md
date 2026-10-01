@@ -110,7 +110,8 @@ changes bump major.
 Release notes use git-cliff 2.14.2 and the shared body in
 [`git-cliff/release-notes.tera`](git-cliff/release-notes.tera). The template
 prefers PR titles and PR authors, falling back to commit messages and commit
-authors when GitHub metadata is unavailable. Sections follow the order of
+authors when GitHub metadata is unavailable. Credits omit `leandrocp`; PR links
+remain on every entry that has an associated PR. Sections follow the order of
 each configuration's commit parsers. Markdown formatting applies to new notes;
 existing changelog history is preserved.
 

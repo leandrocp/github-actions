@@ -10,6 +10,6 @@ https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}
 {% for entry in commits | commit_groups(groups=commit_parsers_groups) %}
 ### {{ entry.group }}
 {% for commit in entry.commits %}
-- {% if commit.scope %}**{{ commit.scope }}:** {% endif %}{% if commit.breaking %}**Breaking:** {% endif %}{% if commit.remote.pr_title %}{{ commit.remote.pr_title | replace_regex(from="^[a-zA-Z]+(\([^)]*\))?!?:\s*", to="") | upper_first }}{% else %}{{ commit.message | upper_first }}{% endif %}{% if commit.remote.pr_author %} by @{{ commit.remote.pr_author }}{% elif commit.remote.username %} by @{{ commit.remote.username }}{% endif %}{% if commit.remote.pr_number %} in [#{{ commit.remote.pr_number }}]({{ self::remote_url() }}/pull/{{ commit.remote.pr_number }}){% endif %}
+- {% if commit.scope %}**{{ commit.scope }}:** {% endif %}{% if commit.breaking %}**Breaking:** {% endif %}{% if commit.remote.pr_title %}{{ commit.remote.pr_title | replace_regex(from="^[a-zA-Z]+(\([^)]*\))?!?:\s*", to="") | upper_first }}{% else %}{{ commit.message | upper_first }}{% endif %}{% if commit.remote.pr_author %}{% if commit.remote.pr_author != "leandrocp" %} by @{{ commit.remote.pr_author }}{% endif %}{% elif commit.remote.username and commit.remote.username != "leandrocp" %} by @{{ commit.remote.username }}{% endif %}{% if commit.remote.pr_number %} in [#{{ commit.remote.pr_number }}]({{ self::remote_url() }}/pull/{{ commit.remote.pr_number }}){% endif %}
 {%- endfor %}
 {% endfor %}
