@@ -83,7 +83,7 @@ runs:
       if: steps.state.outputs.mode == 'prepare'
       uses: orhun/git-cliff-action@f50e11560dce63f7c33227798f90b924471a88b5 # v4.8.0
       with:
-        version: v2.13.1
+        version: v2.14.2
         config: ${{ github.action_path }}/install.toml
         args: >-
           --unreleased
@@ -144,6 +144,7 @@ runs:
         "$RUNNER_TEMP/git-cliff/bin/git-cliff" \
           --config "$GITHUB_ACTION_PATH/cliff.toml" \
           --unreleased \
+          --body-file "$GITHUB_ACTION_PATH/../git-cliff/release-notes.tera" \
           --tag "v$NEXT_VERSION" \
           --github-repo "$GITHUB_REPOSITORY" \
           --output "$notes_path"

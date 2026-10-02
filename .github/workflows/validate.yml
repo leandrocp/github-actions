@@ -5,11 +5,13 @@ on:
     paths:
       - '.github/workflows/**'
       - 'elixir-release/**'
+      - 'git-cliff/**'
   push:
     branches: [main]
     paths:
       - '.github/workflows/**'
       - 'elixir-release/**'
+      - 'git-cliff/**'
   workflow_dispatch:
 
 jobs:
@@ -26,3 +28,15 @@ jobs:
 
       - name: Test Elixir release changelog helper
         run: python3 -m unittest discover -s elixir-release -p 'test_*.py' -v
+
+      - name: Install git-cliff
+        uses: orhun/git-cliff-action@f50e11560dce63f7c33227798f90b924471a88b5 # v4.8.0
+        with:
+          version: v2.14.2
+          config: elixir-release/install.toml
+          args: --offline --strip=all --output=${{ runner.temp }}/git-cliff-install-check
+
+      - name: Test shared release notes
+        env:
+          GIT_CLIFF: ${{ runner.temp }}/git-cliff/bin/git-cliff
+        run: python3 -m unittest discover -s git-cliff -p 'test_*.py' -v

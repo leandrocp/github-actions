@@ -107,6 +107,35 @@ For `0.x` packages, features bump the patch version and breaking changes bump
 the minor version. At `1.0.0` and later, features bump minor and breaking
 changes bump major.
 
+Release notes use git-cliff 2.14.2 and the shared body in
+[`git-cliff/release-notes.tera`](git-cliff/release-notes.tera). The template
+prefers PR titles, falling back to commit messages. Author credits use the PR
+author or the commit-author username returned by GitHub; without either,
+the entry has no author credit. Credits omit `leandrocp`; PR links
+remain on every entry that has an associated PR. Sections follow the order of
+each configuration's commit parsers. Markdown formatting applies to new notes;
+existing changelog history is preserved.
+
+Other repositories can use the same body with their own commit filters,
+version-bump rules, and tag patterns:
+
+```sh
+git-cliff --config cliff.toml --body-file /path/to/github-actions/git-cliff/release-notes.tera --github-repo owner/repo
+```
+
+Pin the shared repository to a commit when checking it out or downloading the
+body in CI. Both `vX.Y.Z` and `<package>/vX.Y.Z` tags are supported. Keep
+`header = ""`, `body = ""`, `footer = ""`, `trim = true`, and `format = true`
+under `[changelog]` in the consuming configuration; the command supplies the
+body. `--templates-dir` with `--init` only creates a copy and does not keep it
+in sync.
+
+Run the template and version-policy tests with git-cliff 2.14.2 on `PATH`:
+
+```sh
+python3 -m unittest discover -s git-cliff -p 'test_*.py' -v
+```
+
 The caller keeps the trigger because reusable workflows cannot define when a
 repository should release:
 

@@ -1,22 +1,11 @@
 # git-cliff configuration for Elixir release pull requests.
 
 [changelog]
-body = """
-{% macro remote_url() -%}
-https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}
-{%- endmacro %}
-
-{% if version %}
-## [{{ version | trim_start_matches(pat="v") }}]({{ self::remote_url() }}/compare/{{ previous.version }}...{{ version }}) ({{ timestamp | date(format="%Y-%m-%d") }})
-{% for group, commits in commits | group_by(attribute="group") %}
-### {{ group | split(pat="|") | last }}
-{% for commit in commits %}
-- {% if commit.scope %}**{{ commit.scope }}:** {% endif %}{% if commit.breaking %}**Breaking:** {% endif %}{% if commit.remote.pr_title %}{{ commit.remote.pr_title | replace_regex(from="^(feat(ure)?|fix|perf|refactor|docs?|revert|security)(\\([^)]*\\))?!?:\\s*", to="") | upper_first }}{% else %}{{ commit.message | upper_first }}{% endif %}{% if commit.remote.username %} by @{{ commit.remote.username }}{% endif %}{% if commit.remote.pr_number %} in [#{{ commit.remote.pr_number }}]({{ self::remote_url() }}/pull/{{ commit.remote.pr_number }}){% endif %}
-{%- endfor %}
-{% endfor %}
-{% endif %}
-"""
+header = ""
+body = ""
+footer = ""
 trim = true
+format = true
 
 [git]
 conventional_commits = true
@@ -30,25 +19,25 @@ commit_parsers = [
   { field = "remote.pr_title", pattern = "(?i)^(bump|update|remove|unlock).*\\bdeps?\\b", skip = true },
   { field = "remote.pr_title", pattern = "^(chore|build)\\(deps.*\\)", skip = true },
   { field = "remote.pr_title", pattern = "^chore(\\([^)]*\\))?: (prepare )?release", skip = true },
-  { field = "remote.pr_title", pattern = "^feat(ure)?(\\([^)]*\\))?!?:", group = "0|Features" },
-  { field = "remote.pr_title", pattern = "^fix(\\([^)]*\\))?!?:", group = "1|Bug Fixes" },
-  { field = "remote.pr_title", pattern = "^perf(\\([^)]*\\))?!?:", group = "2|Performance Improvements" },
-  { field = "remote.pr_title", pattern = "^refactor(\\([^)]*\\))?!?:", group = "3|Code Refactoring" },
-  { field = "remote.pr_title", pattern = "^docs?(\\([^)]*\\))?!?:", group = "4|Documentation" },
-  { field = "remote.pr_title", pattern = "^revert(\\([^)]*\\))?!?:", group = "5|Reverts" },
-  { field = "remote.pr_title", pattern = "^security(\\([^)]*\\))?!?:", group = "6|Security" },
+  { field = "remote.pr_title", pattern = "^feat(ure)?(\\([^)]*\\))?!?:", group = "Features" },
+  { field = "remote.pr_title", pattern = "^fix(\\([^)]*\\))?!?:", group = "Bug Fixes" },
+  { field = "remote.pr_title", pattern = "^perf(\\([^)]*\\))?!?:", group = "Performance Improvements" },
+  { field = "remote.pr_title", pattern = "^refactor(\\([^)]*\\))?!?:", group = "Code Refactoring" },
+  { field = "remote.pr_title", pattern = "^docs?(\\([^)]*\\))?!?:", group = "Documentation" },
+  { field = "remote.pr_title", pattern = "^revert(\\([^)]*\\))?!?:", group = "Reverts" },
+  { field = "remote.pr_title", pattern = "^security(\\([^)]*\\))?!?:", group = "Security" },
   { message = "(?i)^(bump|update|remove|unlock).*\\bdeps?\\b", skip = true },
   { message = "^(chore|build)\\(deps.*\\)", skip = true },
   { message = "^chore(\\([^)]*\\))?: (prepare )?release", skip = true },
-  { message = "^feat(ure)?(\\([^)]*\\))?!?:", group = "0|Features" },
-  { message = "^fix(\\([^)]*\\))?!?:", group = "1|Bug Fixes" },
-  { message = "^perf(\\([^)]*\\))?!?:", group = "2|Performance Improvements" },
-  { message = "^refactor(\\([^)]*\\))?!?:", group = "3|Code Refactoring" },
-  { message = "^docs?(\\([^)]*\\))?!?:", group = "4|Documentation" },
-  { message = "^revert(\\([^)]*\\))?!?:", group = "5|Reverts" },
-  { message = "^security(\\([^)]*\\))?!?:", group = "6|Security" },
+  { message = "^feat(ure)?(\\([^)]*\\))?!?:", group = "Features" },
+  { message = "^fix(\\([^)]*\\))?!?:", group = "Bug Fixes" },
+  { message = "^perf(\\([^)]*\\))?!?:", group = "Performance Improvements" },
+  { message = "^refactor(\\([^)]*\\))?!?:", group = "Code Refactoring" },
+  { message = "^docs?(\\([^)]*\\))?!?:", group = "Documentation" },
+  { message = "^revert(\\([^)]*\\))?!?:", group = "Reverts" },
+  { message = "^security(\\([^)]*\\))?!?:", group = "Security" },
   { message = "^(style|test|build|ci|chore)", skip = true },
-  { message = ".*", group = "9|Other Changes" },
+  { message = ".*", group = "Other Changes" },
 ]
 protect_breaking_commits = false
 filter_commits = true
