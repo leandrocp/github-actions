@@ -58,7 +58,7 @@ jobs:
     - name: Cache Rust
       uses: Swatinem/rust-cache@v2
       with:
-        shared-key: stable-test
+        key: ${{ inputs.manifest-path }}
 
     - name: Run tests
       run: cargo nextest run --all-features --manifest-path ${{ inputs.manifest-path }} ${{ inputs.test-args }}
@@ -89,7 +89,7 @@ jobs:
     - name: Cache Rust
       uses: Swatinem/rust-cache@v2
       with:
-        shared-key: msrv-test
+        key: ${{ inputs.manifest-path }}
 
     - name: Run tests
       run: cargo nextest run --all-features --manifest-path ${{ inputs.manifest-path }} ${{ inputs.test-args }}
@@ -120,7 +120,7 @@ jobs:
     - name: Cache Rust
       uses: Swatinem/rust-cache@v2
       with:
-        shared-key: nightly-test
+        key: ${{ inputs.manifest-path }}
 
     - name: Run tests
       run: cargo nextest run --all-features --manifest-path ${{ inputs.manifest-path }} ${{ inputs.test-args }}
