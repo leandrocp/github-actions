@@ -154,6 +154,28 @@ class ReleaseNotesTest(unittest.TestCase):
         self.commit("fix!: breaking fix")
         self.assertEqual(self.cliff("--unreleased", "--bumped-version").strip(), "v0.2.0")
 
+    def test_dependencies_have_their_own_section_and_bump_patch(self):
+        self.commit("deps: update example to 0.56.0")
+        self.assertEqual(self.cliff("--unreleased", "--bumped-version").strip(), "v0.1.1")
+        context = self.context()
+        self.assertEqual(context[0]["commits"][0]["group"], "Dependencies")
+        notes = self.render(context)
+        self.assertIn("### Dependencies\n\n- Update example to 0.56.0", notes)
+        self.assertNotIn("Other Changes", notes)
+
+    def test_scoped_and_breaking_dependencies_keep_their_category(self):
+        self.commit("deps(parser): update parser")
+        self.commit("deps(runtime)!: require a newer runtime")
+        self.assertEqual(self.cliff("--unreleased", "--bumped-version").strip(), "v0.2.0")
+        context = self.context()
+        for commit in context[0]["commits"]:
+            self.assertEqual(commit["group"], "Dependencies")
+        notes = self.render(context)
+        self.assertEqual(notes.count("### Dependencies"), 1)
+        self.assertIn("- **parser:** Update parser", notes)
+        self.assertIn("- **runtime:** **Breaking:** Require a newer runtime", notes)
+        self.assertNotIn("Other Changes", notes)
+
     def test_stable_version_policy(self):
         self.run_command("git", "tag", "v1.0.0")
         self.commit("feat: new feature")

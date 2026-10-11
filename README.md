@@ -98,10 +98,11 @@ jobs:
 ### Release pull requests
 
 `elixir-release.yml` uses [git-cliff](https://git-cliff.org/) to maintain a
-categorized release pull request. Release notes credit the pull request author,
-omit dependency and housekeeping commits, and do not add a first-contribution
-section. Merging the release pull request tags its merge commit and creates the
-GitHub Release.
+categorized release pull request. Release notes credit the pull request author
+and include `deps:` commits under `Dependencies`. Dependabot updates,
+`chore(deps):`/`build(deps):` updates, and housekeeping commits remain excluded.
+Release notes do not add a first-contribution section. Merging the release pull
+request tags its merge commit and creates the GitHub Release.
 
 For `0.x` packages, features bump the patch version and breaking changes bump
 the minor version. At `1.0.0` and later, features bump minor and breaking

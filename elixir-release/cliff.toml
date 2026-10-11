@@ -26,6 +26,7 @@ commit_parsers = [
   { field = "remote.pr_title", pattern = "^docs?(\\([^)]*\\))?!?:", group = "Documentation" },
   { field = "remote.pr_title", pattern = "^revert(\\([^)]*\\))?!?:", group = "Reverts" },
   { field = "remote.pr_title", pattern = "^security(\\([^)]*\\))?!?:", group = "Security" },
+  { field = "remote.pr_title", pattern = "^deps(\\([^)]*\\))?!?:", group = "Dependencies" },
   { message = "(?i)^(bump|update|remove|unlock).*\\bdeps?\\b", skip = true },
   { message = "^(chore|build)\\(deps.*\\)", skip = true },
   { message = "^chore(\\([^)]*\\))?: (prepare )?release", skip = true },
@@ -36,6 +37,7 @@ commit_parsers = [
   { message = "^docs?(\\([^)]*\\))?!?:", group = "Documentation" },
   { message = "^revert(\\([^)]*\\))?!?:", group = "Reverts" },
   { message = "^security(\\([^)]*\\))?!?:", group = "Security" },
+  { message = "^deps(\\([^)]*\\))?!?:", group = "Dependencies" },
   { message = "^(style|test|build|ci|chore)", skip = true },
   { message = ".*", group = "Other Changes" },
 ]
