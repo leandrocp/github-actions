@@ -40,7 +40,7 @@ workflows:
         - 'taiki-e/install-action@v2.87.28'
     '.github/workflows/validate.yml':
         - 'actions/checkout@v7.0.1'
-        - 'orhun/git-cliff-action@v4.8.0'
+        - 'orhun/git-cliff-action@v4.9.1'
         - 'raven-actions/actionlint@v2.2.0'
 dependencies:
     'actions/attest-build-provenance@v4.2.2':
@@ -118,9 +118,9 @@ dependencies:
         commit: 'sha1-f50e11560dce63f7c33227798f90b924471a88b5'
         owner_id: 24392180
         repo_id: 377964066
-    'orhun/git-cliff-action@v4.8.0':
-        ref: 'v4.8.0'
-        commit: 'sha1-f50e11560dce63f7c33227798f90b924471a88b5'
+    'orhun/git-cliff-action@v4.9.1':
+        ref: 'v4.9.1'
+        commit: 'sha1-a9a95522b26fe6403f7bb24031f21fb573d0f5ff'
         owner_id: 24392180
         repo_id: 377964066
     'peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1':
