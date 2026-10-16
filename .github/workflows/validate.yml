@@ -37,7 +37,7 @@ jobs:
         run: python3 -m unittest discover -s elixir-release -p 'test_*.py' -v
 
       - name: Install git-cliff
-        uses: orhun/git-cliff-action@v4.8.0
+        uses: orhun/git-cliff-action@v4.9.1
         with:
           version: v2.14.2
           config: elixir-release/install.toml
