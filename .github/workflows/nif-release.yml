@@ -70,7 +70,7 @@ jobs:
           - { target: x86_64-unknown-linux-gnu,     os: ubuntu-24.04,                  variant: "legacy_cpu" }
           - { target: x86_64-unknown-linux-musl,    os: ubuntu-24.04, use-cross: true }
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - uses: dtolnay/rust-toolchain@master
         with:
@@ -116,7 +116,7 @@ jobs:
         run: |
           rustup target add ${{ matrix.job.target }}
 
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@v2.9.2
         with:
           prefix-key: v0-precomp
           shared-key: ${{ matrix.job.target }}-${{ matrix.nif }}-${{ matrix.job.os }}-${{ matrix.variant.variant || 'default' }}
@@ -139,12 +139,12 @@ jobs:
 
       - name: Artifact attestation
         if: startsWith(github.ref, 'refs/tags/')
-        uses: actions/attest-build-provenance@v4
+        uses: actions/attest-build-provenance@v4.2.2
         with:
           subject-path: ${{ steps.build-crate.outputs.file-path }}
 
       - name: Artifact upload
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: ${{ steps.build-crate.outputs.file-name }}
           path: ${{ steps.build-crate.outputs.file-path }}
@@ -159,14 +159,14 @@ jobs:
 
     steps:
       - name: Download NIF artifacts
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v8.0.2
         with:
           path: artifacts
           pattern: "*${{ inputs.project-name }}*"
           merge-multiple: true
 
       - name: Publish to GitHub Release
-        uses: softprops/action-gh-release@v3
+        uses: softprops/action-gh-release@v3.0.3
         with:
           files: artifacts/*
 

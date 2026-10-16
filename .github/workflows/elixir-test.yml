@@ -42,10 +42,10 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v7
+      uses: actions/checkout@v7.0.1
 
     - name: Setup Elixir
-      uses: erlef/setup-beam@v1
+      uses: erlef/setup-beam@v1.24.1
       with:
         elixir-version: ${{ matrix.elixir }}
         otp-version: ${{ matrix.otp }}
@@ -60,7 +60,7 @@ jobs:
       run: echo "::remove-matcher owner=elixir-mixCompileWarning::"
 
     - name: Cache mix dependencies
-      uses: actions/cache@v6
+      uses: actions/cache@v6.1.0
       id: mix-cache
       with:
         path: |

@@ -19,18 +19,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7
+        uses: actions/checkout@v7.0.1
 
       - name: Run actionlint
-        uses: raven-actions/actionlint@v2
+        uses: raven-actions/actionlint@v2.2.0
         with:
           fail-on-error: true
+
+      - name: Verify workflow dependency lockfile
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh extension install github/gh-actions-lock --pin v0.2.0
+          gh actions-lock --verify
 
       - name: Test Elixir release changelog helper
         run: python3 -m unittest discover -s elixir-release -p 'test_*.py' -v
 
       - name: Install git-cliff
-        uses: orhun/git-cliff-action@f50e11560dce63f7c33227798f90b924471a88b5 # v4.8.0
+        uses: orhun/git-cliff-action@v4.8.0
         with:
           version: v2.14.2
           config: elixir-release/install.toml

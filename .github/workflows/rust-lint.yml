@@ -29,7 +29,7 @@ jobs:
         rust: ${{ fromJSON(inputs.rust-versions) }}
     steps:
     - name: Checkout code
-      uses: actions/checkout@v7
+      uses: actions/checkout@v7.0.1
 
     - name: Setup Rust
       uses: dtolnay/rust-toolchain@master
@@ -38,7 +38,7 @@ jobs:
         components: rustfmt, clippy
 
     - name: Cache Rust
-      uses: Swatinem/rust-cache@v2
+      uses: Swatinem/rust-cache@v2.9.2
       with:
         shared-key: ${{ matrix.rust }}-lint
 
@@ -55,7 +55,7 @@ jobs:
     if: inputs.msrv != ''
     steps:
     - name: Checkout code
-      uses: actions/checkout@v7
+      uses: actions/checkout@v7.0.1
 
     - name: Setup Rust
       uses: dtolnay/rust-toolchain@master
