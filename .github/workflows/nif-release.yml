@@ -137,6 +137,7 @@ jobs:
           PROJECT_DIR: ${{ inputs.project-dir }}
         run: |
           manifest=$(cargo locate-project --workspace --message-format plain --manifest-path "$PROJECT_DIR/Cargo.toml")
+          manifest="${manifest//\\//}"
           lockfile="$(dirname "$manifest")/Cargo.lock"
           git ls-files --error-unmatch -- "$lockfile"
           git diff --exit-code HEAD -- "$lockfile"
