@@ -11,6 +11,10 @@ on:
         type: string
         required: true
         description: "Directory containing the NIF project (e.g., 'native/my_nif')"
+      locked:
+        type: boolean
+        default: false
+        description: "Build with --locked and reject lockfile changes before uploading artifacts"
       nif-versions:
         type: string
         default: '["2.15"]'
@@ -100,6 +104,9 @@ jobs:
               cargo_args="$cargo_args,${{ matrix.variant.features }}"
             fi
           fi
+          if [ "${{ inputs.locked }}" = "true" ]; then
+            cargo_args="$cargo_args --locked"
+          fi
 
           variant="${{ matrix.job.variant }}"
           if [ "$variant" != "" ] && [ "${{ matrix.variant.variant }}" != "" ]; then
@@ -123,6 +130,19 @@ jobs:
           workspaces: |
             ${{ inputs.project-dir }}
 
+      - name: Require a committed lockfile
+        if: inputs.locked
+        shell: bash
+        env:
+          PROJECT_DIR: ${{ inputs.project-dir }}
+        run: |
+          manifest=$(cargo locate-project --workspace --message-format plain --manifest-path "$PROJECT_DIR/Cargo.toml")
+          manifest="${manifest//\\//}"
+          lockfile="$(dirname "$manifest")/Cargo.lock"
+          git ls-files --error-unmatch -- "$lockfile"
+          git diff --exit-code HEAD -- "$lockfile"
+          echo "NIF_LOCKFILE=$lockfile" >> "$GITHUB_ENV"
+
       - name: Build the project
         id: build-crate
         uses: philss/rustler-precompiled-action@v1.1.5
@@ -136,6 +156,12 @@ jobs:
           project-dir: ${{ inputs.project-dir }}
           variant: ${{ env.FINAL_VARIANT }}
           cargo-args: ${{ env.CARGO_ARGS }}
+
+      # The build action runs cargo tree without --locked before cargo build.
+      - name: Reject lockfile changes
+        if: inputs.locked
+        shell: bash
+        run: git diff --exit-code HEAD -- "$NIF_LOCKFILE"
 
       - name: Artifact attestation
         if: startsWith(github.ref, 'refs/tags/')

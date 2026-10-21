@@ -337,6 +337,10 @@ jobs:
       project-dir: native/my_nif
 ```
 
+Set `locked: true` to build with `--locked` and reject any lockfile changes
+before artifacts are uploaded. Commit the active workspace's `Cargo.lock`
+(or the NIF's lockfile when it is standalone). The default is `false`.
+
 Customize NIF versions:
 
 ```yaml
