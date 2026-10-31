@@ -39,7 +39,7 @@ configuration, and changelog helper used by `elixir-release.yml`.
 2. **Customizable Inputs**: All workflows accept version arrays as JSON strings
    - Example: `pairs: '[{"elixir": "1.17.x", "otp": "27.x"}]'`
    - Example: `rust-versions: '["nightly"]'`
-   - Example: `stable-os-versions: '["ubuntu-22.04", "macos-14"]'`
+   - Example: `stable-os-versions: '["ubuntu-22.04", "macos-15"]'`
    - Example: `nif-versions: '["2.15", "2.16"]'`
 
 3. **Custom Environment Variables**: Elixir workflows support additional environment variables
