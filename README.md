@@ -205,7 +205,7 @@ jobs:
 
 Tests run in two separate job groups:
 - **`test-stable`**: Rust stable on proven LTS OS versions
-  - ubuntu-22.04, windows-2022, macos-14 (3 jobs)
+  - ubuntu-22.04, windows-2022, macos-15 (3 jobs)
 - **`test-nightly`**: Rust nightly on latest OS versions
   - ubuntu-latest, windows-latest, macos-latest (3 jobs)
 
@@ -274,7 +274,7 @@ jobs:
     uses: leandrocp/github-actions/.github/workflows/rust-test.yml@main
     with:
       manifest-path: 'native/my_nif/Cargo.toml'
-      stable-os-versions: '["ubuntu-22.04", "macos-14"]'
+      stable-os-versions: '["ubuntu-22.04", "macos-15"]'
   lint:
     uses: leandrocp/github-actions/.github/workflows/rust-lint.yml@main
     with:
