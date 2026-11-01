@@ -29,7 +29,7 @@ env:
 jobs:
   test:
     name: ${{ matrix.name || format('OTP {0}, Elixir {1}', matrix.otp, matrix.elixir) }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04  # ubuntu-26.04 has no hex.pm OTP 25 builds
     timeout-minutes: 30
     env: ${{ fromJSON(inputs.env_vars) }}
     defaults:
