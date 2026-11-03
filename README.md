@@ -313,6 +313,22 @@ jobs:
 This runs tests on stable, MSRV, and nightly, and verifies that your
 Cargo.toml's `rust-version` field matches the MSRV.
 
+The MSRV matrix uses `stable-os-versions` unless `msrv-os-versions` is set.
+An empty list (`'[]'`) for `stable-os-versions`, `msrv-os-versions`, or
+`nightly-os-versions` skips that group. For example, a pull request can test
+stable on two systems and the MSRV on Linux only, with no nightly:
+
+```yaml
+jobs:
+  test:
+    uses: leandrocp/github-actions/.github/workflows/rust-test.yml@main
+    with:
+      msrv: '1.82.0'
+      stable-os-versions: '["ubuntu-22.04", "windows-2022"]'
+      msrv-os-versions: '["ubuntu-22.04"]'
+      nightly-os-versions: '[]'
+```
+
 ## Usage: NIF Release
 
 Build and release precompiled NIFs for multiple platforms:

@@ -10,7 +10,11 @@ on:
       nightly-os-versions:
         type: string
         default: '["ubuntu-latest", "windows-latest", "macos-latest"]'
-        description: "OS versions to test with rust nightly"
+        description: "OS versions to test with rust nightly; '[]' skips nightly"
+      msrv-os-versions:
+        type: string
+        default: ""
+        description: "OS versions to test with the MSRV; empty uses stable-os-versions, '[]' skips MSRV"
       manifest-path:
         type: string
         default: "Cargo.toml"
@@ -36,7 +40,7 @@ jobs:
     name: os ${{ matrix.os }}, rust stable
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
-    if: inputs.test-stage != 'compatibility'
+    if: inputs.test-stage != 'compatibility' && inputs.stable-os-versions != '[]'
     strategy:
       fail-fast: false
       matrix:
@@ -67,11 +71,13 @@ jobs:
     name: os ${{ matrix.os }}, rust ${{ inputs.msrv }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
-    if: inputs.test-stage != 'stable' && inputs.msrv != ''
+    if: >-
+      inputs.test-stage != 'stable' && inputs.msrv != '' &&
+      (inputs.msrv-os-versions || inputs.stable-os-versions) != '[]'
     strategy:
       fail-fast: false
       matrix:
-        os: ${{ fromJSON(inputs.stable-os-versions) }}
+        os: ${{ fromJSON(inputs.msrv-os-versions || inputs.stable-os-versions) }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v7.0.1
@@ -98,7 +104,7 @@ jobs:
     name: os ${{ matrix.os }}, rust nightly
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
-    if: inputs.test-stage != 'stable'
+    if: inputs.test-stage != 'stable' && inputs.nightly-os-versions != '[]'
     strategy:
       fail-fast: false
       matrix:

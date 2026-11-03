@@ -32,7 +32,7 @@ configuration, and changelog helper used by `elixir-release.yml`.
 1. **Matrix Testing**: Reusable workflows use strategy matrices where it makes sense
    - Elixir test: defaults to Elixir 1.20/OTP 29 and `main-otp-29`/`maint-29`
    - Elixir lint: defaults to the same Elixir/OTP pairs and can optionally run Credo
-   - Rust test: defaults to stable on LTS runners and nightly on latest runners; when `msrv` is set, an additional MSRV matrix runs on the stable OS set
+   - Rust test: defaults to stable on LTS runners and nightly on latest runners; when `msrv` is set, an additional MSRV matrix runs on the stable OS set unless `msrv-os-versions` overrides it; an empty OS list skips its group
    - Rust test stages: `test-stage` defaults to `all`; callers can compose `stable` and `compatibility` calls with `needs` for an opt-in stable-first gate
    - NIF release: builds a target matrix across macOS, Linux, Windows, and FreeBSD targets
 
