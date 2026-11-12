@@ -27,7 +27,7 @@ workflows:
         - 'actions/upload-artifact@v7.0.2'
         - 'dtolnay/rust-toolchain@master'
         - 'philss/rustler-precompiled-action@v1.1.5'
-        - 'softprops/action-gh-release@v3.0.3'
+        - 'softprops/action-gh-release@v3.0.4'
         - 'swatinem/rust-cache@v2.9.3'
     '.github/workflows/rust-lint.yml':
         - 'actions/checkout@v7.0.1'
@@ -143,9 +143,9 @@ dependencies:
         uses:
             - 'actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae'
             - 'actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3'
-    'softprops/action-gh-release@v3.0.3':
-        ref: 'v3.0.3'
-        commit: 'sha1-efb35369e0ad2afab669f228072c1b0d510eae64'
+    'softprops/action-gh-release@v3.0.4':
+        ref: 'v3.0.4'
+        commit: 'sha1-8a0cd651e5b2365bd640854a3fa5dfc70e4875f3'
         owner_id: 2242
         repo_id: 204253808
     'swatinem/rust-cache@v2.9.3':
