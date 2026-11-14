@@ -93,6 +93,15 @@ jobs:
           echo "RUSTFLAGS=${{ matrix.job.rustflags }}" >> "$GITHUB_ENV"
         if: ${{ matrix.job.rustflags }}
 
+      # cross links these targets with zig against this glibc instead of its image's.
+      # Set only here: cross appends CROSS_BUILD_ZIG_VERSION to the target even when empty.
+      - name: Maybe link against an older glibc
+        shell: bash
+        run: |
+          echo "CROSS_BUILD_ZIG=true" >> "$GITHUB_ENV"
+          echo "CROSS_BUILD_ZIG_VERSION=${{ matrix.job.glibc }}" >> "$GITHUB_ENV"
+        if: ${{ matrix.job.glibc }}
+
       - name: Configure feature variant
         shell: bash
         run: |
@@ -146,10 +155,6 @@ jobs:
       - name: Build the project
         id: build-crate
         uses: philss/rustler-precompiled-action@v1.1.5
-        env:
-          # cross links these targets with zig against this glibc instead of its image's.
-          CROSS_BUILD_ZIG: ${{ matrix.job.glibc && 'true' || 'false' }}
-          CROSS_BUILD_ZIG_VERSION: ${{ matrix.job.glibc }}
         with:
           project-name: ${{ inputs.project-name }}
           project-version: ${{ env.PROJECT_VERSION }}
