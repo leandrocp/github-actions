@@ -59,10 +59,10 @@ jobs:
         variant: ${{ fromJSON(inputs.feature-variants) }}
         job:
           - { target: aarch64-apple-darwin,         os: macos-15 }
-          - { target: aarch64-unknown-linux-gnu,    os: ubuntu-24.04, glibc: "2.28" }
+          - { target: aarch64-unknown-linux-gnu,    os: ubuntu-24.04, use-cross: true, glibc: "2.28" }
           - { target: aarch64-unknown-linux-musl,   os: ubuntu-24.04, use-cross: true }
           - { target: arm-unknown-linux-gnueabihf,  os: ubuntu-24.04, use-cross: true }
-          - { target: riscv64gc-unknown-linux-gnu,  os: ubuntu-24.04, glibc: "2.28" }
+          - { target: riscv64gc-unknown-linux-gnu,  os: ubuntu-24.04, use-cross: true }
           - { target: x86_64-apple-darwin,          os: macos-15 }
           - { target: x86_64-pc-windows-gnu,        os: windows-2022,                  rustflags: "-C target-feature=+fxsr,+sse,+sse2,+sse3,+ssse3,+sse4.1,+sse4.2,+popcnt,+avx,+fma" }
           - { target: x86_64-pc-windows-gnu,        os: windows-2022,                  variant: "legacy_cpu" }
@@ -70,8 +70,8 @@ jobs:
           - { target: x86_64-pc-windows-msvc,       os: windows-2022,                  variant: "legacy_cpu" }
           - { target: x86_64-unknown-freebsd,       os: ubuntu-22.04, use-cross: true, rustflags: "-C target-feature=+fxsr,+sse,+sse2,+sse3,+ssse3,+sse4.1,+sse4.2,+popcnt,+avx,+fma" }
           - { target: x86_64-unknown-freebsd,       os: ubuntu-22.04, use-cross: true, variant: "legacy_cpu" }
-          - { target: x86_64-unknown-linux-gnu,     os: ubuntu-24.04, glibc: "2.28",   rustflags: "-C target-feature=+fxsr,+sse,+sse2,+sse3,+ssse3,+sse4.1,+sse4.2,+popcnt,+avx,+fma" }
-          - { target: x86_64-unknown-linux-gnu,     os: ubuntu-24.04, glibc: "2.28",   variant: "legacy_cpu" }
+          - { target: x86_64-unknown-linux-gnu,     os: ubuntu-24.04, use-cross: true, glibc: "2.28", rustflags: "-C target-feature=+fxsr,+sse,+sse2,+sse3,+ssse3,+sse4.1,+sse4.2,+popcnt,+avx,+fma" }
+          - { target: x86_64-unknown-linux-gnu,     os: ubuntu-24.04, use-cross: true, glibc: "2.28", variant: "legacy_cpu" }
           - { target: x86_64-unknown-linux-musl,    os: ubuntu-24.04, use-cross: true }
     steps:
       - uses: actions/checkout@v7.0.1
@@ -145,8 +145,11 @@ jobs:
 
       - name: Build the project
         id: build-crate
-        if: ${{ !matrix.job.glibc }}
         uses: philss/rustler-precompiled-action@v1.1.5
+        env:
+          # cross links these targets with zig against this glibc instead of its image's.
+          CROSS_BUILD_ZIG: ${{ matrix.job.glibc && 'true' || 'false' }}
+          CROSS_BUILD_ZIG_VERSION: ${{ matrix.job.glibc }}
         with:
           project-name: ${{ inputs.project-name }}
           project-version: ${{ env.PROJECT_VERSION }}
@@ -158,52 +161,6 @@ jobs:
           variant: ${{ env.FINAL_VARIANT }}
           cargo-args: ${{ env.CARGO_ARGS }}
 
-      - name: Install cargo-zigbuild
-        if: matrix.job.glibc
-        shell: bash
-        run: |
-          python3 -m venv "$RUNNER_TEMP/zigbuild"
-          "$RUNNER_TEMP/zigbuild/bin/pip" install --quiet cargo-zigbuild==0.24.1 ziglang==0.17.1
-          echo "$RUNNER_TEMP/zigbuild/bin" >> "$GITHUB_PATH"
-
-      # A native or cross build links against the build image's glibc (2.39 on
-      # Ubuntu 24.04). Zig links against the version in the target suffix instead.
-      # Produces the same file name as rustler-precompiled-action.
-      - name: Build the project against glibc ${{ matrix.job.glibc }}
-        id: build-zig
-        if: matrix.job.glibc
-        shell: bash
-        env:
-          PROJECT_DIR: ${{ inputs.project-dir }}
-          PROJECT_NAME: ${{ inputs.project-name }}
-          TARGET: ${{ matrix.job.target }}
-          GLIBC: ${{ matrix.job.glibc }}
-          NIF: ${{ matrix.nif }}
-        run: |
-          root=$(pwd)
-          cd "$PROJECT_DIR"
-          feature="nif_version_${NIF//./_}"
-
-          # Rustler builds for the highest enabled NIF version, so a higher default
-          # would be mislabeled. rustler-precompiled-action rejects this too.
-          # shellcheck disable=SC2086 # CARGO_ARGS holds several arguments
-          highest=$(cargo tree -e features --depth 1 -i rustler -f "{f}" --prefix none --target "$TARGET" --features "$feature" $CARGO_ARGS \
-            | sed -n 1p | tr ',' '\n' | { grep '^nif_version_' || true; } | sort -V | tail -n 1)
-          if [ "$highest" != "$feature" ]; then
-            echo "::error file=Cargo.toml,line=1::Requested $feature, but the enabled features select ${highest:-no NIF version}"
-            exit 1
-          fi
-
-          # shellcheck disable=SC2086 # CARGO_ARGS holds several arguments
-          cargo zigbuild --release --target "$TARGET.$GLIBC" --features "$feature" $CARGO_ARGS
-
-          name="lib${PROJECT_NAME}-v${PROJECT_VERSION}-nif-${NIF}-${TARGET}${FINAL_VARIANT:+--$FINAL_VARIANT}.so"
-          cd "$(cargo metadata --format-version 1 --no-deps | jq -r .target_directory)/$TARGET/release"
-          cp "lib${PROJECT_NAME}.so" "$name"
-          tar -czf "$root/$name.tar.gz" "$name"
-          echo "file-name=$name.tar.gz" >> "$GITHUB_OUTPUT"
-          echo "file-path=$name.tar.gz" >> "$GITHUB_OUTPUT"
-
       # The build action runs cargo tree without --locked before cargo build.
       - name: Reject lockfile changes
         if: inputs.locked
@@ -214,13 +171,13 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         uses: actions/attest-build-provenance@v4.2.2
         with:
-          subject-path: ${{ steps.build-crate.outputs.file-path || steps.build-zig.outputs.file-path }}
+          subject-path: ${{ steps.build-crate.outputs.file-path }}
 
       - name: Artifact upload
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: ${{ steps.build-crate.outputs.file-name || steps.build-zig.outputs.file-name }}
-          path: ${{ steps.build-crate.outputs.file-path || steps.build-zig.outputs.file-path }}
+          name: ${{ steps.build-crate.outputs.file-name }}
+          path: ${{ steps.build-crate.outputs.file-path }}
 
   release:
     name: Publish release
