@@ -357,6 +357,12 @@ Set `locked: true` to build with `--locked` and reject any lockfile changes
 before artifacts are uploaded. Commit the active workspace's `Cargo.lock`
 (or the NIF's lockfile when it is standalone). The default is `false`.
 
+The `x86_64`, `aarch64`, and `riscv64gc` `-unknown-linux-gnu` artifacts are built
+with `cargo zigbuild` against glibc 2.28, so they load on RHEL/Rocky/Alma 8,
+Debian 10, and newer. The crate must define the
+`nif_version_*` features from the
+[precompilation guide](https://hexdocs.pm/rustler_precompiled/precompilation_guide.html).
+
 Customize NIF versions:
 
 ```yaml
