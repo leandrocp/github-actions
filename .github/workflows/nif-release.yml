@@ -182,8 +182,20 @@ jobs:
         run: |
           root=$(pwd)
           cd "$PROJECT_DIR"
+          feature="nif_version_${NIF//./_}"
+
+          # Rustler builds for the highest enabled NIF version, so a higher default
+          # would be mislabeled. rustler-precompiled-action rejects this too.
           # shellcheck disable=SC2086 # CARGO_ARGS holds several arguments
-          cargo zigbuild --release --target "$TARGET.$GLIBC" --features "nif_version_${NIF//./_}" $CARGO_ARGS
+          highest=$(cargo tree -e features --depth 1 -i rustler -f "{f}" --prefix none --target "$TARGET" --features "$feature" $CARGO_ARGS \
+            | sed -n 1p | tr ',' '\n' | { grep '^nif_version_' || true; } | sort -V | tail -n 1)
+          if [ "$highest" != "$feature" ]; then
+            echo "::error file=Cargo.toml,line=1::Requested $feature, but the enabled features select ${highest:-no NIF version}"
+            exit 1
+          fi
+
+          # shellcheck disable=SC2086 # CARGO_ARGS holds several arguments
+          cargo zigbuild --release --target "$TARGET.$GLIBC" --features "$feature" $CARGO_ARGS
 
           name="lib${PROJECT_NAME}-v${PROJECT_VERSION}-nif-${NIF}-${TARGET}${FINAL_VARIANT:+--$FINAL_VARIANT}.so"
           cd "$(cargo metadata --format-version 1 --no-deps | jq -r .target_directory)/$TARGET/release"
