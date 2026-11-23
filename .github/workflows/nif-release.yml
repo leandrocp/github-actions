@@ -182,21 +182,47 @@ jobs:
         shell: bash
         run: git diff --exit-code HEAD -- "$NIF_LOCKFILE"
 
-      # glibc reserves only a small block for dlopen'ed libraries with STATIC_TLS,
-      # shared by every NIF in the VM, so such a NIF can fail to load next to another.
-      - name: Reject static TLS
+      # Each check is a way a shipped NIF has failed to load on users' machines.
+      # STATIC_TLS: glibc gives dlopen'ed libraries a small static TLS reserve shared
+      # by every NIF in the VM, so such a NIF can fail next to another.
+      - name: Check what the NIF needs to load
         if: contains(matrix.job.target, '-linux-gnu')
         shell: bash
         env:
           ARTIFACT: ${{ steps.build-crate.outputs.file-path }}
+          GLIBC_FLOOR: ${{ matrix.job.glibc }}
         run: |
           dir=$(mktemp -d)
           tar -xzf "$ARTIFACT" -C "$dir"
           dynamic=$(readelf -dW "$dir"/*.so)
-          if grep -w STATIC_TLS <<< "$dynamic"; then
-            echo "::error::$(basename "$ARTIFACT") needs static TLS and may fail to load with other NIFs"
-            exit 1
+          symbols=$(readelf --dyn-syms -W "$dir"/*.so)
+          versions=$(readelf -VW "$dir"/*.so)
+          failed=0
+          fail() { echo "::error::$(basename "$ARTIFACT") $1"; failed=1; }
+
+          if grep -qw STATIC_TLS <<< "$dynamic"; then
+            fail "needs static TLS, so it can fail to load next to another NIF"
           fi
+
+          if ! awk '$8 == "nif_init" && $7 != "UND" { found = 1 } END { exit !found }' <<< "$symbols"; then
+            fail "does not export nif_init"
+          fi
+
+          while read -r lib; do
+            case "$lib" in
+              libc.so.6|libm.so.6|libpthread.so.0|libdl.so.2|librt.so.1|libgcc_s.so.1|ld-linux*.so.*) ;;
+              *) fail "links $lib, which the host may not have" ;;
+            esac
+          done < <(sed -n 's/.*(NEEDED).*\[\(.*\)\]/\1/p' <<< "$dynamic")
+
+          if [ -n "$GLIBC_FLOOR" ]; then
+            newest=$(grep -o 'GLIBC_[0-9][0-9.]*' <<< "$versions" | sed 's/GLIBC_//' | sort -V | tail -n1)
+            if [ "$(printf '%s\n' "$newest" "$GLIBC_FLOOR" | sort -V | tail -n1)" != "$GLIBC_FLOOR" ]; then
+              fail "needs glibc $newest, newer than the supported $GLIBC_FLOOR"
+            fi
+          fi
+
+          exit "$failed"
 
       - name: Artifact attestation
         if: startsWith(github.ref, 'refs/tags/')
