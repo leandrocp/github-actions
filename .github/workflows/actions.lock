@@ -87,12 +87,12 @@ dependencies:
         repo_id: 192625955
     'dtolnay/rust-toolchain@master':
         ref: 'master'
-        commit: 'sha1-683b588c487a69d01f6c6ddf40f036ff682cc2c8'
+        commit: 'sha1-df2a88e9fe4098bad09cb42c3dec7187f15861fc'
         owner_id: 1940490
         repo_id: 260749683
     'dtolnay/rust-toolchain@stable':
         ref: 'stable'
-        commit: 'sha1-b725eda525362e7cf34af9a7243cac1e3f01a7ec'
+        commit: 'sha1-39008827e6b4319a349e9a42dfc90579dd25f1ca'
         owner_id: 1940490
         repo_id: 260749683
     'erlef/setup-beam@v1.24.1':
@@ -107,12 +107,19 @@ dependencies:
         repo_id: 305650801
     'leandrocp/github-actions@main':
         ref: 'main'
-        commit: 'sha1-39bb898a7de9ee83dab83dbb4ef7a8b8b5edcf67'
+        commit: 'sha1-23de1f93e99237419e9dcc3c383b320b0d8da1cc'
         owner_id: 36407
         repo_id: 1077562973
         uses:
+            - 'orhun/git-cliff-action@a9a95522b26fe6403f7bb24031f21fb573d0f5ff'
             - 'orhun/git-cliff-action@f50e11560dce63f7c33227798f90b924471a88b5'
+            - 'peter-evans/create-pull-request@15733dbdfeedb4f7fdb73d13c6f5ac83b710fab8'
             - 'peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1'
+    'orhun/git-cliff-action@a9a95522b26fe6403f7bb24031f21fb573d0f5ff':
+        ref: 'v4.9.1'
+        commit: 'sha1-a9a95522b26fe6403f7bb24031f21fb573d0f5ff'
+        owner_id: 24392180
+        repo_id: 377964066
     'orhun/git-cliff-action@f50e11560dce63f7c33227798f90b924471a88b5':
         ref: 'v4.8.0'
         commit: 'sha1-f50e11560dce63f7c33227798f90b924471a88b5'
@@ -123,6 +130,11 @@ dependencies:
         commit: 'sha1-a9a95522b26fe6403f7bb24031f21fb573d0f5ff'
         owner_id: 24392180
         repo_id: 377964066
+    'peter-evans/create-pull-request@15733dbdfeedb4f7fdb73d13c6f5ac83b710fab8':
+        ref: 'v8.1.2'
+        commit: 'sha1-15733dbdfeedb4f7fdb73d13c6f5ac83b710fab8'
+        owner_id: 18365890
+        repo_id: 197176365
     'peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1':
         ref: 'v8.1.1'
         commit: 'sha1-5f6978faf089d4d20b00c7766989d076bb2fc7f1'
