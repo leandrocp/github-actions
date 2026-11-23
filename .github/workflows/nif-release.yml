@@ -38,7 +38,7 @@ on:
       smoke-script:
         type: string
         default: ""
-        description: "Script that Mix.install's the NIF's package by path and calls into it (e.g., 'packages/elixir/my_app/test/precompiled_smoke.exs'); empty skips the smoke test"
+        description: "Script that Mix.install's the NIF's package by path and calls into it, relative to the repository root and run from working-directory (e.g., 'packages/elixir/my_app/test/precompiled_smoke.exs'); empty skips the smoke test"
     secrets:
       R2_ACCOUNT_ID:
         required: false
@@ -294,11 +294,12 @@ jobs:
         env:
           IMAGE: ${{ matrix.system.image }}
           SMOKE_SCRIPT: ${{ inputs.smoke-script }}
+          PACKAGE_DIR: ${{ inputs.working-directory }}
           # Rocky 8 has no OTP image; these are the RabbitMQ el8 build and the official Elixir zip.
           SETUP: ${{ matrix.system.otp-rpm && 'dnf install -y -q unzip && curl -fsSL -o /tmp/erlang.rpm https://github.com/rabbitmq/erlang-rpm/releases/download/v27.3.4.19/erlang-27.3.4.19-1.el8.$(uname -m).rpm && dnf install -y -q /tmp/erlang.rpm && curl -fsSL -o /tmp/elixir.zip https://github.com/elixir-lang/elixir/releases/download/v1.18.4/elixir-otp-27.zip && unzip -q /tmp/elixir.zip -d /opt/elixir && export PATH=/opt/elixir/bin:$PATH' || 'true' }}
         run: |
           docker run --rm \
-            -v "$GITHUB_WORKSPACE:/work" -v "$RUNNER_TEMP/nifs:/cache" \
+            -v "$GITHUB_WORKSPACE:/work" -v "$RUNNER_TEMP/nifs:/cache" -w "/work/$PACKAGE_DIR" \
             -e RUSTLER_PRECOMPILED_GLOBAL_CACHE_PATH=/cache -e LANG=C.UTF-8 \
             "$IMAGE" sh -c "$SETUP && mix local.hex --force && mix local.rebar --force && elixir /work/$SMOKE_SCRIPT"
 
