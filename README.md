@@ -361,6 +361,10 @@ The `x86_64` and `aarch64` `-unknown-linux-gnu` artifacts are built with cross's
 zig support against glibc 2.28, so they load on RHEL/Rocky/Alma 8, Debian 10,
 and newer.
 
+Every `-linux-gnu` artifact is checked before upload: it must export `nif_init`,
+link only libc, libm, libpthread, libdl, librt, libgcc_s and the dynamic loader,
+need no static TLS, and need no glibc newer than its target's floor.
+
 Customize NIF versions:
 
 ```yaml
