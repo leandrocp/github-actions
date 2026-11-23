@@ -192,7 +192,8 @@ jobs:
         run: |
           dir=$(mktemp -d)
           tar -xzf "$ARTIFACT" -C "$dir"
-          if readelf -dW "$dir"/*.so | grep -w STATIC_TLS; then
+          dynamic=$(readelf -dW "$dir"/*.so)
+          if grep -w STATIC_TLS <<< "$dynamic"; then
             echo "::error::$(basename "$ARTIFACT") needs static TLS and may fail to load with other NIFs"
             exit 1
           fi
