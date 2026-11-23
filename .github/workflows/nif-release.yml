@@ -34,11 +34,11 @@ on:
       nif-module:
         type: string
         default: ""
-        description: "Module that uses RustlerPrecompiled (e.g., 'MyApp.Native'); required with smoke-project"
-      smoke-project:
+        description: "Module that uses RustlerPrecompiled (e.g., 'MyApp.Native'); required with smoke-script"
+      smoke-script:
         type: string
         default: ""
-        description: "Mix project that depends on the NIF's package by path and runs smoke.exs (e.g., 'packages/elixir/my_app/smoke'); empty skips the smoke test"
+        description: "Script that Mix.install's the NIF's package by path and calls into it (e.g., 'packages/elixir/my_app/test/precompiled_smoke.exs'); empty skips the smoke test"
     secrets:
       R2_ACCOUNT_ID:
         required: false
@@ -245,12 +245,12 @@ jobs:
           path: ${{ steps.build-crate.outputs.file-path }}
 
   # Installs the artifacts just built through rustler_precompiled, as a user's
-  # `mix deps.get` would, and runs the caller's smoke.exs on systems they have
+  # `mix deps.get` would, and runs the caller's smoke script on systems they have
   # failed on before: the oldest supported glibc, and Ubuntu 22.04 with OTP 29.
   smoke:
     name: Smoke test on ${{ matrix.system.name }}
     needs: build
-    if: inputs.smoke-project != ''
+    if: inputs.smoke-script != ''
     runs-on: ${{ matrix.system.runner }}
     timeout-minutes: 30
     permissions:
@@ -289,18 +289,18 @@ jobs:
           } > "$CHECKSUM"
           cat "$CHECKSUM"
 
-      - name: Install the NIFs and run smoke.exs
+      - name: Install the NIFs and run the smoke script
         shell: bash
         env:
           IMAGE: ${{ matrix.system.image }}
-          SMOKE_PROJECT: ${{ inputs.smoke-project }}
+          SMOKE_SCRIPT: ${{ inputs.smoke-script }}
           # Rocky 8 has no OTP image; these are the RabbitMQ el8 build and the official Elixir zip.
           SETUP: ${{ matrix.system.otp-rpm && 'dnf install -y -q unzip && curl -fsSL -o /tmp/erlang.rpm https://github.com/rabbitmq/erlang-rpm/releases/download/v27.3.4.19/erlang-27.3.4.19-1.el8.$(uname -m).rpm && dnf install -y -q /tmp/erlang.rpm && curl -fsSL -o /tmp/elixir.zip https://github.com/elixir-lang/elixir/releases/download/v1.18.4/elixir-otp-27.zip && unzip -q /tmp/elixir.zip -d /opt/elixir && export PATH=/opt/elixir/bin:$PATH' || 'true' }}
         run: |
           docker run --rm \
             -v "$GITHUB_WORKSPACE:/work" -v "$RUNNER_TEMP/nifs:/cache" \
             -e RUSTLER_PRECOMPILED_GLOBAL_CACHE_PATH=/cache -e LANG=C.UTF-8 \
-            "$IMAGE" sh -c "$SETUP && cd /work/$SMOKE_PROJECT && mix local.hex --force && mix local.rebar --force && mix deps.get && mix run smoke.exs"
+            "$IMAGE" sh -c "$SETUP && mix local.hex --force && mix local.rebar --force && elixir /work/$SMOKE_SCRIPT"
 
   release:
     name: Publish release

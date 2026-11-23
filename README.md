@@ -365,13 +365,13 @@ Every `-linux-gnu` artifact is checked before upload: it must export `nif_init`,
 link only libc, libm, libpthread, libdl, librt, libgcc_s and the dynamic loader,
 need no static TLS, and need no glibc newer than its target's floor.
 
-Set `smoke-project` and `nif-module` to install the artifacts just built and run
-them before anything is published. The smoke project is a Mix project that
-depends on your package by path, plus any other NIF packages your users load
-alongside it, and has a `smoke.exs` that calls into the NIF. rustler_precompiled
-installs this run's artifacts from a local cache, verified against a generated
-checksum file, on Rocky Linux 8 (x86_64 and aarch64), Ubuntu 22.04, Debian 13
-and Alpine. A failure skips the release.
+Set `smoke-script` and `nif-module` to install the artifacts just built and run
+them before anything is published. The smoke script uses `Mix.install/2` to
+install your package by path, plus any other NIF packages your users load
+alongside it, and calls into the NIF. rustler_precompiled installs this run's
+artifacts from a local cache, verified against a generated checksum file, on
+Rocky Linux 8 (x86_64 and aarch64), Ubuntu 22.04, Debian 13 and Alpine. A failure
+skips the release.
 
 ```yaml
 jobs:
@@ -381,7 +381,7 @@ jobs:
       project-name: my_nif
       project-dir: native/my_nif
       nif-module: MyApp.Native
-      smoke-project: smoke
+      smoke-script: test/precompiled_smoke.exs
 ```
 
 Customize NIF versions:
