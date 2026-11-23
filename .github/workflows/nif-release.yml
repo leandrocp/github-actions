@@ -31,6 +31,14 @@ on:
         type: string
         default: ""
         description: "R2 object key path where artifacts will be uploaded"
+      nif-module:
+        type: string
+        default: ""
+        description: "Module that uses RustlerPrecompiled (e.g., 'MyApp.Native'); required with smoke-project"
+      smoke-project:
+        type: string
+        default: ""
+        description: "Mix project that depends on the NIF's package by path and runs smoke.exs (e.g., 'packages/elixir/my_app/smoke'); empty skips the smoke test"
     secrets:
       R2_ACCOUNT_ID:
         required: false
@@ -236,10 +244,68 @@ jobs:
           name: ${{ steps.build-crate.outputs.file-name }}
           path: ${{ steps.build-crate.outputs.file-path }}
 
+  # Installs the artifacts just built through rustler_precompiled, as a user's
+  # `mix deps.get` would, and runs the caller's smoke.exs on systems they have
+  # failed on before: the oldest supported glibc, and Ubuntu 22.04 with OTP 29.
+  smoke:
+    name: Smoke test on ${{ matrix.system.name }}
+    needs: build
+    if: inputs.smoke-project != ''
+    runs-on: ${{ matrix.system.runner }}
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        system:
+          - { name: "Rocky Linux 8 x86_64",  runner: ubuntu-24.04,     target: x86_64-unknown-linux-gnu,  image: "rockylinux:8", otp-rpm: true }
+          - { name: "Rocky Linux 8 aarch64", runner: ubuntu-24.04-arm, target: aarch64-unknown-linux-gnu, image: "rockylinux:8", otp-rpm: true }
+          - { name: "Ubuntu 22.04",          runner: ubuntu-24.04,     target: x86_64-unknown-linux-gnu,  image: "hexpm/elixir:1.20.5-erlang-29.0.6-ubuntu-jammy-20261110" }
+          - { name: "Debian 13",             runner: ubuntu-24.04,     target: x86_64-unknown-linux-gnu,  image: "hexpm/elixir:1.20.5-erlang-29.0.6-debian-trixie-20261104" }
+          - { name: "Alpine 3.22",           runner: ubuntu-24.04,     target: x86_64-unknown-linux-musl, image: "hexpm/elixir:1.20.5-erlang-29.0.6-alpine-3.22.8" }
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Download this target's NIFs
+        uses: actions/download-artifact@v8.0.2
+        with:
+          path: ${{ runner.temp }}/nifs
+          pattern: "*${{ inputs.project-name }}*${{ matrix.system.target }}*"
+          merge-multiple: true
+
+      - name: Write the checksum file
+        shell: bash
+        env:
+          NIFS: ${{ runner.temp }}/nifs
+          CHECKSUM: ${{ inputs.working-directory }}/checksum-Elixir.${{ inputs.nif-module }}.exs
+        run: |
+          {
+            echo "%{"
+            for f in "$NIFS"/*.tar.gz; do
+              echo "  \"$(basename "$f")\" => \"sha256:$(sha256sum "$f" | cut -d' ' -f1)\","
+            done
+            echo "}"
+          } > "$CHECKSUM"
+          cat "$CHECKSUM"
+
+      - name: Install the NIFs and run smoke.exs
+        shell: bash
+        env:
+          IMAGE: ${{ matrix.system.image }}
+          SMOKE_PROJECT: ${{ inputs.smoke-project }}
+          # Rocky 8 has no OTP image; these are the RabbitMQ el8 build and the official Elixir zip.
+          SETUP: ${{ matrix.system.otp-rpm && 'dnf install -y -q unzip && curl -fsSL -o /tmp/erlang.rpm https://github.com/rabbitmq/erlang-rpm/releases/download/v27.3.4.19/erlang-27.3.4.19-1.el8.$(uname -m).rpm && dnf install -y -q /tmp/erlang.rpm && curl -fsSL -o /tmp/elixir.zip https://github.com/elixir-lang/elixir/releases/download/v1.18.4/elixir-otp-27.zip && unzip -q /tmp/elixir.zip -d /opt/elixir && export PATH=/opt/elixir/bin:$PATH' || 'true' }}
+        run: |
+          docker run --rm \
+            -v "$GITHUB_WORKSPACE:/work" -v "$RUNNER_TEMP/nifs:/cache" \
+            -e RUSTLER_PRECOMPILED_GLOBAL_CACHE_PATH=/cache -e LANG=C.UTF-8 \
+            "$IMAGE" sh -c "$SETUP && cd /work/$SMOKE_PROJECT && mix local.hex --force && mix local.rebar --force && mix deps.get && mix run smoke.exs"
+
   release:
     name: Publish release
-    needs: build
-    if: startsWith(github.ref, 'refs/tags/')
+    needs: [build, smoke]
+    if: ${{ !cancelled() && !failure() && startsWith(github.ref, 'refs/tags/') }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
