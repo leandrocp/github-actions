@@ -37,7 +37,7 @@ workflows:
         - 'actions/checkout@v7.0.1'
         - 'dtolnay/rust-toolchain@master'
         - 'swatinem/rust-cache@v2.9.3'
-        - 'taiki-e/install-action@v2.90.3'
+        - 'taiki-e/install-action@v2.90.8'
     '.github/workflows/validate.yml':
         - 'actions/checkout@v7.0.1'
         - 'orhun/git-cliff-action@v4.9.1'
@@ -165,8 +165,8 @@ dependencies:
         commit: 'sha1-d1527c8f67ef9af357290475d4af4b0fab8f12e0'
         owner_id: 580492
         repo_id: 298565987
-    'taiki-e/install-action@v2.90.3':
-        ref: 'v2.90.3'
-        commit: 'sha1-cfdb7ed4ccc7c7dce37759eae89dc5674b469b39'
+    'taiki-e/install-action@v2.90.8':
+        ref: 'v2.90.8'
+        commit: 'sha1-fe3acb53a98b62c772db35de75ce0e4595e7ca8c'
         owner_id: 43724913
         repo_id: 442947557
